@@ -1,9 +1,19 @@
 import rss from '@astrojs/rss';
 
+const postImportResult = import.meta.glob('./posts/**.mdx', { eager: true });
+let posts = Object.values(postImportResult);
+posts = posts.filter((post)=> {
+  return post.frontmatter.draft != true
+})
+
 export const get = () => rss({
   title: 'Shubham Blog',
-  description: 'Get notification for my new blogs.',
+  description: 'Subscribe and get notified',
   site: import.meta.env.SITE,
-  items: import.meta.glob('./posts/**.mdx'),
+  items: posts.map((post) => ({
+    link: post.url,
+    title: post.frontmatter.title,
+    pubDate: post.frontmatter.pubDate
+  })),
   stylesheet: '/style.xsl',
 });
