@@ -16,7 +16,7 @@ blogs = blogs.filter((post) => !post.frontmatter.draft);
 blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf());
 ---
 
-<Layout title="Astro Basic Blog Template" description="This is a blog template made with Astro and Tailwind. Made by Lance Ross">
+<Layout title="Blog Index" description="">
   <section class="flex flex-col sm:flex-row justify-evenly items-center py-14">
     <div class="w-32 m-5 md:m-10">
       <Icon name="simple-icons:astro" class="w-32 overflow-hidden inline-flex" />

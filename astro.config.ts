@@ -8,7 +8,7 @@ import astroLayouts from "astro-layouts";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://basicblog.lanceross.xyz",
+  site: "https://shubham.codes",
   markdown: {
     shikiConfig: {
       theme: "dracula",
