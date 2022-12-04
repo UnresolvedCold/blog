@@ -6,8 +6,6 @@ name: Firebase CI
 on:
   push:
     branches: [ "publish" ]
-  pull_request:
-    branches: [ "publish" ]
 
 jobs:
   build:
