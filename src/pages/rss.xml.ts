@@ -7,8 +7,8 @@ posts = posts.filter((post)=> {
 })
 
 export const get = () => rss({
-  title: 'Shubham Blog',
-  description: 'Subscribe and get notified',
+  title: 'shubham.codes blog',
+  description: 'subscribe and get notified',
   site: import.meta.env.SITE,
   items: posts.map((post) => ({
     link: post.url,

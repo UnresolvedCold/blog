@@ -2,7 +2,8 @@
 import Layout from "@layouts/Layout.astro";
 import BlogCard from "@components/BlogCard.astro";
 import Subscribe from "@components/Subscribe.astro";
-import { Icon } from "astro-icon";
+import { Picture } from "@astrojs/image/components";
+import SchwiftyCold from "@images/SchwiftyCold.png"
 
 interface Frontmatter {
   title: string;
@@ -18,9 +19,18 @@ blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Dat
 
 <Layout title="Blog Index" description="">
   <section class="flex flex-col sm:flex-row justify-evenly items-center py-14">
-    <div class="w-32 m-5 md:m-10">
-      <Icon name="simple-icons:astro" class="w-32 overflow-hidden inline-flex" />
-    </div>
+    <Picture
+      src={SchwiftyCold}
+      class="rounded-full overflow-hidden inline-flex sm:m-8"
+      alt="Lance Ross with a Face Mask"
+      aspectRatio="1:1"
+      widths={[320]}
+      loading="eager"
+      sizes="160px"
+      width={240}
+      height={240}
+    />
+    
     <header class="max-w-xl sm:order-first">
       <h1 class="text-3xl mb-10 md:mb-5 text-center sm:text-left">Hi, I am Shubham.</h1>
       <p class="text-black dark:text-zinc-300 mb-5">Right now, I'm working with GreyOrange as a software development engineer.</p>
