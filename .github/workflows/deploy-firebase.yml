@@ -21,7 +21,7 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - name: Archive Dist
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: dist
         path: dist
@@ -30,7 +30,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download Dist
         uses: actions/download-artifact@v2
         with:
