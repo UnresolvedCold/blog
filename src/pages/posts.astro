@@ -6,9 +6,11 @@ interface Frontmatter {
   title: string;
   pubDate: string;
   description: string;
+  draft: boolean
 }
 
 let blogs = await Astro.glob<Frontmatter>("./posts/*.mdx");
+blogs = blogs.filter((post) => !post.frontmatter.draft);
 blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf());
 ---
 
