@@ -1,68 +1,85 @@
 ---
 import { Icon } from "astro-icon";
 
-const desktop = [
+const icons = [
   {
     name: "Posts",
     href: "/posts",
+    icon: "eva:book-open-outline",
+  },
+  {
+    icon: "eva:github-outline",
+    href: "https://github.com/UnresolvedCold",
+  },
+  {
+    icon: "eva:twitter-outline",
+    href: "https://twitter.com/schwiftycold",
+  },
+  {
+    icon: "eva:linkedin-outline",
+    href: "https://linkedin.com/in/schwiftycold",
   },
   {
     name: "RSS",
     href: "/rss.xml",
-  },
-];
-
-const mobile = [
-  {
     icon: "ph:rss-simple-bold",
-    href: "/rss.xml",
   },
 ];
 ---
 
-<header class="dark:bg-zinc-900 bg-white max-w-4xl m-auto transition-colors motion-reduce:transition-none">
-  <a href="/" class="text-2xl text-black dark:text-zinc-300 hover:dark:text-white transition-colors motion-reduce:transition-none absolute m-8">shubham.codes</a>
+<header
+  class="dark:bg-zinc-900 bg-white max-w-4xl m-auto transition-colors motion-reduce:transition-none"
+>
+  <a
+    href="/"
+    class="text-2xl text-black dark:text-zinc-300 hover:dark:text-white transition-colors motion-reduce:transition-none absolute m-8"
+    >shubham.codes</a
+  >
   <nav class="p-8">
     <ul class="flex justify-end items-center m-0">
       <li>
         <ul class="flex flex-row space-x-4">
           {
-            desktop.map((desktop) => (
+            // For Large Screens
+            icons.map((desktop_ico) => (
               <li>
-                <a href={desktop.href} class="hidden sm:block text-black dark:text-zinc-400 hover:text-zinc-500 dark:hover:text-white transition-colors motion-reduce:transition-none text-xl">
-                  {desktop.name}
+                <a
+                  href={desktop_ico.href}
+                  target="_blank"
+                  rel="noopener nofollow"
+                  aria-label="github logo"
+                  class="hidden sm:block text-black dark:text-zinc-400 hover:text-zinc-500 dark:hover:text-white transition-colors motion-reduce:transition-none text-xl"
+                >
+                  <Icon
+                    name={desktop_ico.icon}
+                    class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none"
+                  />
                 </a>
               </li>
             ))
           }
           {
-            mobile.map((mobile) => (
+            icons.map((mobile) => (
               <li class="sm:hidden">
                 <a href={mobile.href}>
-                  <Icon name={mobile.icon} class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none" />
+                  <Icon
+                    name={mobile.icon}
+                    class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none"
+                  />
                 </a>
               </li>
             ))
           }
           <li>
-            <a href="https://github.com/UnresolvedCold" target="_blank" rel="noopener nofollow" aria-label="github logo">
-              <Icon name="eva:github-outline" class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none" />
-            </a>
-          </li>
-          <li>
-            <a href="https://twitter.com/schwiftycold" target="_blank" rel="noopener nofollow" aria-label="twitter logo">
-              <Icon name="eva:twitter-outline" class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none" />
-            </a>
-          </li>
-          <li>
-            <a href="https://linkedin.com/in/schwiftycold" target="_blank" rel="noopener nofollow" aria-label="twitter logo">
-              <Icon name="eva:linkedin-outline" class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none" />
-            </a>
-          </li>
-          <li>
             <button class="theme-toggle pointer" aria-label="theme toggle">
-              <Icon name="charm:moon" class="w-7 hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none dark:hidden" />
-              <Icon name="akar-icons:sun" class="w-7 dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none hidden dark:block" />
+              <Icon
+                name="charm:moon"
+                class="w-7 hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none dark:hidden"
+              />
+              <Icon
+                name="akar-icons:sun"
+                class="w-7 dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none hidden dark:block"
+              />
             </button>
           </li>
         </ul>
