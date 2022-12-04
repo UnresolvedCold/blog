@@ -1,0 +1,35 @@
+---
+title: How to create and deploy your own custom blog 
+description: it's an adventure to control your content as well as content controllers
+pubDate: 12/05/2022
+draft: 
+---
+
+This is how I quickly hosted the platform where this blog exists that you are reading right now.
+
+You'll need a text editor with dev container support (like **VS Code**), **Docker** and **Github account**. 
+For deployment you can use one of the many static site hosting platforms. 
+We would be using astro as the building stack. Thanks for the advice [Guruvardhan](https://mobile.twitter.com/guruxkancharla).
+
+Heroku, AWS, Vercel are good options to explore but I'll go with **[firebase hosting](https://firebase.google.com/)** (no particular reason).   
+If you need a custom domain, say hello to [porkbun](https://porkbun.com/). 
+
+## Understanding the flow
+
+![](https://i.imgur.com/yaU5448.png)
+
+Above is what we want to do. `src` contains all the things we want to update at any point in a time.
+
+`src/pages/*.astro` contains the main view of our website. The layouts are defined at `src/layouts` 
+
+
+[Lance Ross](https://basicblog.lanceross.xyz/)
+
+Let's start from the end. You need a GitHub account because that's where we'll implement our magical **CICD** pipelines.
+CICD is a huge thing in itself and  you should explore this.
+For us it's just a way to update our website on every new post.
+If you want to use any other similar tools like Jenkins, go for it. 
+
+You're free to go and select any templates form the [astro library](https://astro.build/themes/blog/). 
+I am going with [Lance Ross's template](https://basicblog.lanceross.xyz/) because of it's minimalist and elegant design. 
+It also has a dark/light theme button. 
