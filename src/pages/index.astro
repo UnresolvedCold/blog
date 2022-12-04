@@ -20,17 +20,18 @@ blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Dat
       <Icon name="simple-icons:astro" class="w-32 overflow-hidden inline-flex" />
     </div>
     <header class="max-w-xl sm:order-first">
-      <h1 class="text-3xl mb-10 md:mb-5 text-center sm:text-left">Welcome to my Astro Blog Template</h1>
-      <p class="text-black dark:text-zinc-300 mb-5">I got bored and decided to create an Astro template from scratch. Hope you like it!</p>
+      <h1 class="text-3xl mb-10 md:mb-5 text-center sm:text-left">Hi, I am Shubham.</h1>
+      <p class="text-black dark:text-zinc-300 mb-5">Right now, I'm working with GreyOrange as a software development engineer.</p>
       <p class="text-black dark:text-zinc-300">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Iusto, debitis minima! Illo esse quod enim id deleniti, veritatis magnam dolorum non accusantium quam et nemo dolorem
-        aspernatur eligendi quidem est.
+        Being a major in math and electronics, I am fascinated with computers and everythng revolving around them. 
+      </p>
+      <p class="text-black dark:text-zinc-300">
+        Here, I write about some of my interesting works and important findings. 
       </p>
     </header>
   </section>
   <section class="py-14">
     <h1 class="text-3xl mb-5">Recent Post</h1>
-    <p class="text-black dark:text-zinc-300 mb-2">Looking for all of my blog posts? Click the "posts" or the "Show more posts" link down below.</p>
     <ul class="flex flex-col justify-center py-5">
       {
         blogs.length > 1 &&
