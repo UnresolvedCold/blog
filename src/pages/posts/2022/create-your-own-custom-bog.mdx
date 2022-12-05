@@ -1,22 +1,23 @@
 ---
-title: How to create and deploy your own custom blog 
+title: A simple blogging site for personal use
 description: it's an adventure to control your contents and hosting platforms
 pubDate: Dec 05, 2022
 draft:
 ---
 import BlogImage from "@components/BlogImage.astro"
 import UseGithubTemplate from "@images/posts/2022/create-your-own-custom-blog/use-github-template.png"
+import PorkbunDNS from "@images/posts/2022/create-your-own-custom-blog/porkbun-dns.png"
+import Firebase from "@images/posts/2022/create-your-own-custom-blog/somedomain-firebase.png"
+import FirebaseVerify from "@images/posts/2022/create-your-own-custom-blog/somedomain-firebase-verify-txt.png"
+
 
 This is how I quickly hosted the platform where this blog exists that you are reading right now.
 
-> Right now, there isn't a way to post comments and I am writing my blogs as `mdx` files in VS Code.
+> There isn't a way to post comments as of now. You'll need to ping me on social platforms. 
 
-You'll need a text editor with dev container support (like **VS Code**), **Docker** and **Github account**. 
-For deployment you can use one of the many static site hosting platforms. 
-We would be using astro as the building stack. Thanks for the advice [Guruvardhan](https://mobile.twitter.com/guruxkancharla).
-
-Heroku, AWS, Vercel are good options to explore but I'll go with **[firebase hosting](https://firebase.google.com/)** (no particular reason).   
-If you need a custom domain, say hello to [porkbun](https://porkbun.com/). 
+All I required was a text editor with dev container support (like **VS Code**), **Docker** and **Github account**. 
+For deployment there are many static site hosting platforms. I am going with **[firebase hosting](https://firebase.google.com/)** for deploying my site.
+As per the advice of one of my close friends, [Guruvardhan](https://mobile.twitter.com/guruxkancharla) this is built using Astro (MDX pages for blogging).
 
 ## Understanding the flow
 
@@ -42,9 +43,11 @@ src
     └── rss.xml.ts
 ```
 
-`src/pages/posts` is where your new blog posts live. All these `mdx` files are different blogs.
+`src/pages/posts` is where the blog posts live. All these `mdx` files are different blogs.
 
-`src/pages/*.astro` contains the main view of our website. The layouts are defined at `src/layouts`.
+`src/pages/*.astro` contains the main view components of the website. The layouts are defined at `src/layouts`.
+
+`rss.xml.ts` is the configuration for my blog's RSS feed. You can subscribe using Feedly or any other newsreader app. 
 
 ### Publishing the blog
 
@@ -74,8 +77,10 @@ Save this token as GitHub Action secret as key value with key as 'FIREBASE_TOKEN
 
 1. Create an account on [Porkbun](porkbun.com) and buy a domain of your liking.
 1. Go to firebase and click on hosting. There you can find `Add custom domain` button. 
+    <BlogImage src={Firebase} alt="Lance Ross create repo from template" />
 1. Clicking this will ask you to provide your domain (Example: shubham.codes). Don't mention 'https' or 'www'.
 1. In the next steps, it will ask you to update `A` and `TXT` records with your domain provider which is [porkbun](porkbun.com) in our case.
     1. Go to porkbun and click on the `Details` button on your domain name.
     1. Click on DNS record and update the `A` and `TXT`.
+        <BlogImage src={PorkbunDNS} alt="Lance Ross create repo from template" />
     1. It takes some time to get activated. It's mentioned 24 hours but for me it took around 2 hours.  
