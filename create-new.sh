@@ -18,5 +18,3 @@ echo "<BlogImage src={image_target} alt='Beagle Dog by Jules D. on Unsplash' />"
 
 # Result
 echo "Starter file generated"
-echo "You can upload your posts images at src/images/posts/YYYY/$name"
-echo "Images can be imported using "
