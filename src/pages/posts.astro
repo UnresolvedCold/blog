@@ -14,7 +14,7 @@ blogs = blogs.filter((post) => !post.frontmatter.draft);
 blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf());
 ---
 
-<Layout title="Posts" description="hello world">
+<Layout title="Posts" description="Blog Posts">
   <section class="flex flex-col mt-8">
     <h1 class="text-3xl mb-5">Posts</h1>
     <h2 class="text-xl text-black dark:text-zinc-300">
