@@ -2,7 +2,7 @@
 name=$1
 year=$(date +'%Y')
 date=$(date +'%b %d, %Y')
-git checkout -b $name
+git checkout -b $name origin/draft
 mkdir -p src/pages/posts/$year/
 new_file="src/pages/posts/$year/$name.mdx"
 mkdir -p src/images/posts/$year/$name
