@@ -18,6 +18,12 @@ jobs:
       with:
         node-version: 16
         cache: 'npm'
+    - name: Cache builds
+      id: cache-builds
+      uses: actions/cache@v3
+      with:
+        path: dist
+        key: ${{ runner.os }}-dist
     - run: npm ci
     - run: npm run build --if-present
     - name: Archive Dist
@@ -72,7 +78,7 @@ jobs:
   publish-social:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
-    if: ${{ needs.get-new-blogs.outputs.any-changed == true }} 
+    # if: ${{ needs.get-new-blogs.outputs.any-changed == true }} 
     strategy: 
       matrix: 
         blog: [ "${{ needs.get-new-blogs.outputs.new-blogs }}" ]
