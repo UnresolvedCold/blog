@@ -72,7 +72,7 @@ jobs:
   publish-telegram:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
-    if: ${{ needs.get-new-blogs.outputs.new-blogs[#] }} -ge 1
+    if: ${{ needs.get-new-blogs.outputs.any-changed == true }} 
     strategy: 
       matrix: 
         blog: [ "${{ needs.get-new-blogs.outputs.new-blogs }}" ]
