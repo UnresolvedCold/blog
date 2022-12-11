@@ -77,6 +77,6 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            There is a new blog post for you.
-            ${{ needs.get-new-blogs.outputs.new-blogs }}
+            https://www.google.com
+            # ${{ needs.get-new-blogs.outputs.new-blogs }}
             
