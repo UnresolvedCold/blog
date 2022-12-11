@@ -69,7 +69,8 @@ jobs:
           echo "newblogs=${newblogs[@]}" >> $GITHUB_OUTPUT
   publish-telegram:
     needs: get-new-blogs
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest 
+    if: ${{ needs.get-new-blogs.outputs.new-blogs }} != ''
     strategy: 
       matrix: 
         blog: "[${{ needs.get-new-blogs.outputs.new-blogs }}]"
