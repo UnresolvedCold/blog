@@ -68,6 +68,8 @@ jobs:
           done
           newblogs=$(echo "${newblogs[@]}" | xargs | sed -e 's/ /, /g')
           echo "newblogs=${newblogs}"
+          echo "anychanged=${{ steps.changed-files.outputs.any_added }}"
+          echo "anychanged=${{ steps.changed-files.outputs.any_changed }}"
           echo "newblogs=${newblogs}" >> $GITHUB_OUTPUT
   publish-telegram:
     needs: get-new-blogs
