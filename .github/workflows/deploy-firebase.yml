@@ -83,7 +83,7 @@ jobs:
     # if: ${{ needs.get-new-blogs.outputs.any-changed == true }} 
     strategy: 
       matrix: 
-        blog: ${{ needs.get-new-blogs.outputs.new-blogs }}
+        blog: ${{ fromJson(needs.get-new-blogs.outputs.new-blogs) }}
     steps:
       - name: Notify on Telegram
         uses: appleboy/telegram-action@master
