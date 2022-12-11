@@ -83,7 +83,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            count = ${{ needs.get-new-blogs.outputs.new-blogs[#] }}
+            count = ${{ needs.get-new-blogs.outputs.new-blogs }}
             bool = ${{ needs.get-new-blogs.outputs.any-changed }}
             val = ${{ matrix.blog }}
             
