@@ -53,8 +53,8 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     outputs: 
-      new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
-      any-changed: ${{ steps.changed-files.outputs.any_changed }}
+      # new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
+      new-blogs: ${{ steps.changed-files.outputs.added_files }}
     steps:
       - uses: actions/checkout@v3
         with:
