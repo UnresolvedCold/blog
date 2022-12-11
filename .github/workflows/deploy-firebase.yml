@@ -37,7 +37,7 @@ jobs:
           name: dist
           path: dist
       - name: Depoy to Firebase
-        if: [ ${GITHUB_REF##*/} == "publish" ]
+        if: ${GITHUB_REF##*/} == "publish"
         uses: w9jds/firebase-action@master
         with:
           args: deploy --only hosting
