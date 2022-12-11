@@ -5,7 +5,7 @@ name: Firebase CI
 
 on:
   push:
-    branches: [ "publish" ]
+    branches: [ "publish", "test" ]
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 16
       uses: actions/setup-node@v3
       with:
         node-version: 16
@@ -37,9 +37,31 @@ jobs:
           name: dist
           path: dist
       - name: Depoy to Firebase
+        if: [ ${GITHUB_REF##*/} == "publish" ]
         uses: w9jds/firebase-action@master
         with:
           args: deploy --only hosting
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  publish-social: 
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v34
+        with:
+          files: |
+            src/pages/post/**/*.mdx
+      - name: List of new blogs
+        id: new-blogs
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
+
+
     
