@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest  
     strategy: 
       matrix: 
-        blog: [${{ needs.get-new-blogs.outputs.new-blogs }}]
+        blog: "[${{ needs.get-new-blogs.outputs.new-blogs }}]"
     steps:
       - name: Notify on Telegram
         uses: appleboy/telegram-action@master
