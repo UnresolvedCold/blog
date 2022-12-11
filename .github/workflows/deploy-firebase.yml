@@ -5,7 +5,7 @@ name: Firebase CI
 
 on:
   push:
-    branches: [ "publish", "test" ]
+    branches: [ "publish" ]
 
 jobs:
   build:
@@ -36,13 +36,13 @@ jobs:
         with:
           name: dist
           path: dist
-      - name: Depoy to Firebase
-        if: ${GITHUB_REF##*/} == "publish"
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only hosting
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      # TODO: Change this before production
+      # - name: Depoy to Firebase
+      #   uses: w9jds/firebase-action@master
+      #   with:
+      #     args: deploy --only hosting
+      #   env:
+      #     FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
   publish-social: 
     needs: deploy
     runs-on: ubuntu-latest
