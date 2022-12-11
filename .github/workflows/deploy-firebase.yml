@@ -85,7 +85,6 @@ jobs:
         blog: needs.get-new-blogs.outputs.new-blogs 
     steps:
       - name: Notify on Telegram
-        if: ${{ matrix.blog != '' }}
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
