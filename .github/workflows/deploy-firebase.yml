@@ -48,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
+      any-changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -71,10 +72,10 @@ jobs:
   publish-telegram:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
-    if: ${{ needs.get-new-blogs.outputs.new-blogs }} != ''
+    if: ${{ needs.get-new-blogs.outputs.any-changed }} == 'true'
     strategy: 
       matrix: 
-        blog: "[${{ needs.get-new-blogs.outputs.new-blogs }}]"
+        blog: "[ ${{ needs.get-new-blogs.outputs.new-blogs }} ]"
     steps:
       - name: Notify on Telegram
         uses: appleboy/telegram-action@master
