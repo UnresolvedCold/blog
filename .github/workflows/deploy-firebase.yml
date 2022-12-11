@@ -55,7 +55,7 @@ jobs:
         uses: tj-actions/changed-files@v34
         with:
           files: |
-            ./src/pages/post/**/*.mdx
+            src/pages/posts/**/*.mdx
       - name: List of new blogs
         id: new-blogs
         run: |
