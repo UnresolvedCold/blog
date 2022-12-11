@@ -43,9 +43,11 @@ jobs:
       #     args: deploy --only hosting
       #   env:
       #     FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-  publish-social: 
+  get-new-blogs: 
     needs: deploy
     runs-on: ubuntu-latest
+    outputs: 
+      new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -59,9 +61,22 @@ jobs:
       - name: List of new blogs
         id: new-blogs
         run: |
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$file was changed"
+          newblogs=()
+          for file in ${{ steps.changed-files.outputs.added_files }}; do
+            newblogs+=(https://shubham.codes${file:9})
           done
-
-
-    
+          echo "newblogs=${newblogs[@]}"
+          echo "newblogs=${newblogs[@]}" >> $GITHUB_OUTPUT
+  publish-telegram:
+    needs: get-new-blogs
+    runs-on: ubuntu-latest  
+    steps:
+      - name: Notify on Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            There is a new blog post for you.
+            ${{ needs.get-new-blogs.outputs.new-blogs }}
+            
