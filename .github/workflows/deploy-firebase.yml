@@ -63,7 +63,7 @@ jobs:
         run: |
           newblogs=()
           for file in ${{ steps.changed-files.outputs.added_files }}; do
-            newblogs+=(https://shubham.codes${file:9})
+            newblogs+=(https://shubham.codes${file:9:-4})
           done
           echo "newblogs=${newblogs[@]}"
           echo "newblogs=${newblogs[@]}" >> $GITHUB_OUTPUT
