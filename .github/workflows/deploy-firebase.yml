@@ -72,7 +72,7 @@ jobs:
   publish-telegram:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
-    if: ${{ needs.get-new-blogs.outputs.any-changed }} == true
+    if: ${{ needs.get-new-blogs.outputs.new-blogs[#] }} -ge 1
     strategy: 
       matrix: 
         blog: [ "${{ needs.get-new-blogs.outputs.new-blogs }}" ]
@@ -83,6 +83,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ needs.get-new-blogs.outputs.any-changed }}
-            ${{ matrix.blog }}
+            count = ${{ needs.get-new-blogs.outputs.new-blogs[#] }}
+            bool = ${{ needs.get-new-blogs.outputs.any-changed }}
+            val = ${{ matrix.blog }}
             
