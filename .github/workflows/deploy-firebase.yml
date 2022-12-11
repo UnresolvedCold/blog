@@ -66,16 +66,17 @@ jobs:
           json: "true"
           files: |
             src/pages/posts/**/*.mdx
-      # - name: List of new blogs
-      #   id: new-blogs
-      #   run: |
-      #     newblogs=()
-      #     for file in ${{ steps.changed-files.outputs.added_files }}; do
-      #       newblogs+=(https://shubham.codes${file:9:-4})
-      #     done
-      #     newblogs=$(echo "${newblogs[@]}" | xargs | sed -e 's/ /, /g')
-      #     echo "newblogs=${newblogs}"
-      #     echo "newblogs=${newblogs}" >> $GITHUB_OUTPUT
+      - name: List of new blogs
+        id: new-blogs
+        run: |
+          echo ${{ steps.changed-files.outputs.added_files }}
+          # newblogs=()
+          # for file in ${{ steps.changed-files.outputs.added_files }}; do
+          #   newblogs+=(https://shubham.codes${file:9:-4})
+          # done
+          # newblogs=$(echo "${newblogs[@]}" | xargs | sed -e 's/ /, /g')
+          # echo "newblogs=${newblogs}"
+          # echo "newblogs=${newblogs}" >> $GITHUB_OUTPUT
   publish-social:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
