@@ -70,6 +70,9 @@ jobs:
   publish-telegram:
     needs: get-new-blogs
     runs-on: ubuntu-latest  
+    strategy: 
+      matrix: 
+        blog: [${{ needs.get-new-blogs.outputs.new-blogs }}]
     steps:
       - name: Notify on Telegram
         uses: appleboy/telegram-action@master
@@ -77,6 +80,5 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            https://www.google.com
-            # ${{ needs.get-new-blogs.outputs.new-blogs }}
+            ${{ matrix.blog }}
             
