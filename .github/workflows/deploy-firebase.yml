@@ -69,7 +69,9 @@ jobs:
       - name: List of new blogs
         id: new-blogs
         run: |
-          echo ${{ steps.changed-files.outputs.added_files }}
+          echo added files = ${{ steps.changed-files.outputs.added_files }}
+          echo changed files = ${{ steps.changed-files.outputs.all_changed_files }}
+          echo "matrix={\"container\":${{ steps.changed-files.outputs.all_changed_files }}}"
           # newblogs=()
           # for file in ${{ steps.changed-files.outputs.added_files }}; do
           #   newblogs+=(https://shubham.codes${file:9:-4})
