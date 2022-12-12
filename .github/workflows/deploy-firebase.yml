@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       # new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
-      new-blogs: ${{ steps.changed-files.outputs.added_files }}
+      new-blogs: ${{ steps.new-blogs.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -71,7 +71,7 @@ jobs:
         run: |
           echo added files = ${{ steps.changed-files.outputs.added_files }}
           echo changed files = ${{ steps.changed-files.outputs.all_changed_files }}
-          echo "matrix={\"container\":${{ steps.changed-files.outputs.all_changed_files }}}"
+          echo "matrix={\"container\":${{ steps.changed-files.outputs.all_changed_files }}}" >> $GITHUB_OUTPUT
           # newblogs=()
           # for file in ${{ steps.changed-files.outputs.added_files }}; do
           #   newblogs+=(https://shubham.codes${file:9:-4})
