@@ -51,6 +51,8 @@ We also had many feature branches but they were mostly independent so merging wa
 
 Running `git init` creates a new `.git` directory. This directory contains everything `git` needs to do it's work.
 
+### `objects` directory
+
 The `objects` directory inside `.git` contains all the blobs, trees and commits. 
 Blobs are a type of data structure contains a compressed info related to the changed files. 
 Each time you run `git add .`, a new blob is created inside the `objects` directory. 
@@ -71,9 +73,8 @@ info/     pack/
 
 > ls .git/objects/0c
 2c5f41c83de09587dfe46d5a5382eddf5bb77f
-
 # The complete hash of the blob is 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f
-# Note: The directory name is included along with the contents.
+# Note: The first 2 letters are the directory name
 
 # You can also view the contents of the blob
 > git cat-file blob 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f
@@ -97,6 +98,7 @@ bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
 # It contains a reference to the blobs or trees
 > git cat-file -p 56bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
 100644 blob 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f    test.txt
+# 0c2c5f... is the hash of the blob created above
 ```
 
 A tree represents the state of the system. Commits are just hashed trees. 
@@ -109,10 +111,55 @@ They are also stored in the same manner.
 0c/   52/   56/   info/    pack/    # 52 is newly generated directory
 
 > git cat-file -p 5203c0048b4795669114fcdb261dc5bb4e77a54f
-tree 56bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
+tree 56bac5fc9c69776a5c67daa2225ef9b2e1edd4f6       # This is the hash of the tree we created above
 author Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530
 committer Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530
 ```
 A commit just contains the recent tree hash and inforamtion on author, time and committer. 
 
+### `refs` directory
+
+The `refs` directory contains the reference to commits. 
+There are 2 types of reference - branch and tags. 
+Tags identify a unique commit while branch points to the latest child along the tree. 
+
+```bash
+> ls .git/refs/heads
+master               # There is just one branch right now
+
+# Let's create a new branch and see what happens
+> git checkout -b dev
+Switched to a new branch 'dev'
+
+> ls .git/ref/heads
+dev   master        # Now you can see both the branches
+
+> cat .git/ref/heads/dev
+5203c0048b4795669114fcdb261dc5bb4e77a54f 
+# Points to the latest commit. This is the exact same hash of the commit we created above. 
+
+> git commit -m "commit to dev" --allow-empty
+[dev 9d6d972] commit to dev
+
+> cat .git/ref/heads/dev
+9d6d972066b774e89343e57f2eb053559bf3f22c 
+# Creating a new commit changes the contents of the active branch.
+```
+
+### `logs` directory
+
+This contains the history of every branch. 
+Everytime you change the branch using `git checkout <branch-name>` or update the tip, `logs/HEAD` is updated. 
+`logs/refs/heads` contains the history of commits for a particular branch. 
+This is a safety net. You can easily retrieve your work even after a rebase. 
+
+```bash
+# To view the logs/HEAD
+> git reflog
+9d6d972 (HEAD -> dev) HEAD@{0}: checkout: moving from master to dev
+5203c00 (master) HEAD@{1}: checkout: moving from dev to master
+9d6d972 (HEAD -> dev) HEAD@{2}: commit: commit to dev
+5203c00 (master) HEAD@{3}: checkout: moving from master to dev
+5203c00 (master) HEAD@{4}: commit (initial): initial commit
+```
 
