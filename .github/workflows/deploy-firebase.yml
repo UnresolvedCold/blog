@@ -81,7 +81,6 @@ jobs:
     strategy: 
       matrix: 
         blog: ${{ fromJson(needs.get-new-blogs.outputs.new-blogs) }}
-        max-parallel: 4
     steps:
       - name: Notify on Telegram
         uses: appleboy/telegram-action@master
