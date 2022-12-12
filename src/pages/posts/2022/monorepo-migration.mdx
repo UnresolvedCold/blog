@@ -1,0 +1,53 @@
+---
+title: Combining multiple git repositories into a single repository retaining all the commit histories
+description: One of the task assigned to me by my company was to migrate multiple git repos on Bitbucket to GitHub as a mono-repo. Let's see how I did it.
+pubDate: Dec 12, 2022
+draft: 
+---
+import BlogImage from "@components/BlogImage.astro"
+
+## The Problem
+
+In my company, we were having multiple maven projects that were dependent on each other. 
+And for every project we were maintaining a separate `git` repository hosted on Bitbucket.
+
+Due to certain use-case, we wanted to migrate all our Bitbucket repos to GitHub. 
+And to avoid any circular dependency issue we also wanted to combine all these related repos into a mono-repo system. 
+We wanted to combine all these repos as a subdirectory of a larger parent project (which in our case was a maven parent). 
+
+#### `Folder structure`
+```bash
+parent
+ ├── POM.XML        // Our new parent POM
+ ├── .git           // This is our new git that will contain all the histories
+ ├── repo1         
+ │   ├── POM.XML
+ │   ├── ...
+ │   └── .git       // This git will be removed
+ ├── repo2
+ │   ├── POM.XML
+ │   ├── ...
+ │   └── .git       // This git will be removed
+ └── repo3
+     ├── POM.XML
+     ├── ...
+     └── .git       // This git will be removed
+```
+
+Combining the repos is the easier part. 
+All you need to do is create a master `POM.XML` that will contain all the sub-repos as submodules. 
+
+The difficult part is retaining all the histories. 
+As each repository has it's own `.git`, removing this will delete all the associated histories.
+After which we won't be able to identify the code changes, commits and most importantly the branches. 
+
+At GreyOrange, we maintian a `develop` branch and certain `release` branches for each repo.
+We wanted to merge their histories so that we can have all our commits on the same branch as they were originally. 
+We cannot retain the commit hash as the folder structure has changed but we want all our commit messages. 
+
+We also had many feature branches but they were mostly independent so merging wasn't required for them. 
+
+## A bit about git 
+
+Running `git init` creates a new `.git` directory. This directory contains everything `git` needs. 
+
