@@ -63,7 +63,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v34
         with:
-          json: "true"
+          json: true
           files: |
             src/pages/posts/**/*.mdx
       - name: List of new blogs
