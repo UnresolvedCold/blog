@@ -72,9 +72,9 @@ jobs:
           for file in ${{ steps.changed-files.outputs.added_files }}; do
             newblogs+=(\"https://shubham.codes${file:9:-4}\")
           done
-          newblogs=$(echo "${newblogs[@]}" | xargs | sed -e 's/ /, /g')
-          echo "newblogs=[${newblogs}]"
-          echo "newblogs=[${newblogs}]" >> $GITHUB_OUTPUT
+          newblogs=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${newblogs[@]}")
+          echo "newblogs=${newblogs}"
+          echo "newblogs=${newblogs}" >> $GITHUB_OUTPUT
   publish-social:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
