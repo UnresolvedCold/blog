@@ -49,5 +49,70 @@ We also had many feature branches but they were mostly independent so merging wa
 
 ## A bit about git 
 
-Running `git init` creates a new `.git` directory. This directory contains everything `git` needs. 
+Running `git init` creates a new `.git` directory. This directory contains everything `git` needs to do it's work.
+
+The `objects` directory inside `.git` contains all the blobs, trees and commits. 
+Blobs are a type of data structure contains a compressed info related to the changed files. 
+Each time you run `git add .`, a new blob is created inside the `objects` directory. 
+
+```bash
+> ls .git/objects
+info/     pack/
+
+# Create a file with it's content as test
+> echo "test" >> test.txt
+> ls .
+    test.txt 
+
+# adding changes creates blob of the changed files
+> git add .
+> ls .git/objects
+0c/   info/    pack/      # 0c and 9d are the 2 directories containing the changes
+
+> ls .git/objects/0c
+2c5f41c83de09587dfe46d5a5382eddf5bb77f
+
+# The complete hash of the blob is 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f
+# Note: The directory name is included along with the contents.
+
+# You can also view the contents of the blob
+> git cat-file blob 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f
+test
+```
+
+Multiple blobs are combined together to form a tree data srructure. 
+Generally this happens before a commit.
+But you can run `git write-tree` to generate a tree of recent blobs. 
+These trees are also stored inside `objects` directory.
+
+```bash
+> git write-tree    # This outputs the hash associated with the tree generated
+56bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
+
+# Trees are stored in the same manner
+> ls .git/objects/56
+bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
+
+# You can also view the content of a tree file
+# It contains a reference to the blobs or trees
+> git cat-file -p 56bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
+100644 blob 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f    test.txt
+```
+
+A tree represents the state of the system. Commits are just hashed trees. 
+They are also stored in the same manner. 
+
+```bash
+> git commit -m "initial commit"
+
+> ls .git/objects
+0c/   52/   56/   info/    pack/    # 52 is newly generated directory
+
+> git cat-file -p 5203c0048b4795669114fcdb261dc5bb4e77a54f
+tree 56bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
+author Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530
+committer Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530
+```
+A commit just contains the recent tree hash and inforamtion on author, time and committer. 
+
 
