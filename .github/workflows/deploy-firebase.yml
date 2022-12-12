@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       # new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
-      new-blogs: ${{ steps.new-blogs.outputs.matrix }}
+      new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -63,22 +63,18 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v34
         with:
-          json: true
           files: |
             src/pages/posts/**/*.mdx
       - name: List of new blogs
         id: new-blogs
         run: |
-          echo added files = ${{ steps.changed-files.outputs.added_files }}
-          echo changed files = ${{ steps.changed-files.outputs.all_changed_files }}
-          echo "matrix={\"container\":${{ steps.changed-files.outputs.all_changed_files }}}" >> $GITHUB_OUTPUT
-          # newblogs=()
-          # for file in ${{ steps.changed-files.outputs.added_files }}; do
-          #   newblogs+=(https://shubham.codes${file:9:-4})
-          # done
-          # newblogs=$(echo "${newblogs[@]}" | xargs | sed -e 's/ /, /g')
-          # echo "newblogs=${newblogs}"
-          # echo "newblogs=${newblogs}" >> $GITHUB_OUTPUT
+          newblogs=()
+          for file in ${{ steps.changed-files.outputs.added_files }}; do
+            newblogs+=("https://shubham.codes${file:9:-4}")
+          done
+          newblogs=$(echo "${newblogs[@]}" | xargs | sed -e 's/ /, /g')
+          echo "newblogs=${newblogs}"
+          echo "newblogs=[${newblogs}]" >> $GITHUB_OUTPUT
   publish-social:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
