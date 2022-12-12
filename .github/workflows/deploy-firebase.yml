@@ -73,12 +73,12 @@ jobs:
             newblogs+=(\"https://shubham.codes${file:9:-4}\")
           done
           newblogs=$(echo "${newblogs[@]}" | xargs | sed -e 's/ /, /g')
-          echo "newblogs=\[${newblogs}\]"
-          echo "newblogs=\[${newblogs}\]" >> $GITHUB_OUTPUT
+          echo "newblogs=[${newblogs}]"
+          echo "newblogs=[${newblogs}]" >> $GITHUB_OUTPUT
   publish-social:
     needs: get-new-blogs
     runs-on: ubuntu-latest 
-    # if: ${{ needs.get-new-blogs.outputs.any-changed == true }} 
+    if: ${{ needs.get-new-blogs.outputs.new-blogs }} 
     strategy: 
       matrix: 
         blog: ${{ fromJson(needs.get-new-blogs.outputs.new-blogs) }}
