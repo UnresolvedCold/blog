@@ -293,7 +293,7 @@ parent
     └── README.md
 ```
 We will create a new git repository. 
-And include the remotes of our repository we want to merge. 
+And include the remotes of the repository we want to merge. 
 We want to fetch everything from these repos. This is done by calling `git fetch --all`. 
 Then, one by one, we can create a new subdirectory for each repository. 
 And at last, we can manipulate the git history into thinking the codes were present in the subdirectory from the beginning.
@@ -390,7 +390,7 @@ We can see that both the files and commit histories were successfully migrated t
 Now we can do the same process for repo2. 
 If you have more than one branch, you'll need to repeat the process for each one.
 
-But first we must delete the original references in order to create a new one. 
+But first, we must delete the original references in order to create a new one. 
 And we also want to merge the previous references with the new ones.
 So let's save the current HEAD and delete the references.
 
@@ -450,7 +450,7 @@ d0b5806 (HEAD -> main) Migrated
 ```
 
 This is the fundamental method for merging two repositories into one while retaining all commit histories. 
-Now, of course we never want to manually redo this for all the repos and for all the branches.
+Now, of course, we never want to manually redo this for all the repos and all the branches.
 A script would be helpful.
 
 ## Merging using Shopsys monorepo-tools
@@ -459,7 +459,7 @@ And as they say,
 > Don't reinvent the wheel.
 
 There are numerous such merger tools available online, we used [monorepo-tools by shopsys](https://github.com/shopsys/monorepo-tools). 
-There were several tweaks we did for our use case. One was that, by default this tool only merges the `master` branch. 
+There were several tweaks we did for our use case. One was that by default this tool only merges the `master` branch. 
 And here we are trying to merge the `main` branch so, we'll need to update the `shopsys` repo to do this. 
 
 > Under the hood, monorepo-tools is using the same commands described above. 
@@ -494,7 +494,7 @@ Let's see how you can merge 2 repos using shopsys monorepo-tools now.
 ```
 
 This is how easy it is to merge multiple repos using shopsys monorepo-tools. 
-There are variety of other things that you try with this tool like splitting a repo into multiple repos (reverse of what we did here). 
+There are a variety of other things that you try with this tool like splitting a repo into multiple repos (reverse of what we did here). 
 Not exploring this here.
 
 Let's verify if everything worked !!!
@@ -556,5 +556,5 @@ Everything seems perfect.
 
 The merging of multiple repositories into a monorepo structure can be accomplished by rewriting `git` histories.
 This can be done manually by fetching a repo and tweaking the git index to believe it belongs to a subdirectory rather than the main repo itself. 
-Another way is by using open source tools like [shopsys monorepo tools](https://github.com/shopsys/monorepo-tools) with which merging can be done in a few steps.
+Another way is by using open-source tools like [shopsys monorepo tools](https://github.com/shopsys/monorepo-tools) with which merging can be done in a few steps.
 More tweaks can be done with `monorepo-tools` to merge multiple branches and create a higher level `POM` inside every commit. 
