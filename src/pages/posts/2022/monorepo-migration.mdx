@@ -24,8 +24,9 @@ In our company, we had multiple maven projects that were dependent on each other
 And for every project we maintianed a separate `git` repository hosted on Bitbucket.
 
 Due to a certain use-case, we wanted to migrate all our Bitbucket repos to GitHub. 
-And to avoid any circular dependency issue, we also wanted to combine all these related repos into a mono-repo system. 
-We wanted to combine all these repos as a subdirectory of a new larger parent project. 
+And to avoid any circular dependency issue, we also wanted to combine all these related repositories into a mono-repo system.
+
+The idea is to have a parent git repository which will contain all these repositories as a subdirectory.
 
 > Things described here will work for any project using git version control irrespective of the hosting platform.
 
@@ -49,19 +50,18 @@ parent
 ```
 
 Combining the repos is the easier part. 
-As we are using maven, all you require to do is create a master `POM.XML` that will contain all the sub-repos as submodules. 
+As we were using maven, all we required was to create a master `POM.XML` that will contain all the sub-repos as submodules. 
 
 > Again, the steps defined here are not dependent on maven or any other package manager.
 
-The difficult part is retaining all the histories. 
+The difficult part was to retain all the histories which I'll explain in this blog. 
 As each repository has it's own `.git`, removing this will delete all the associated histories.
 After which we won't be able to identify the code changes, commits and, most importantly the branches. 
 
-At GreyOrange, we maintain a `develop` branch and certain `release` branches for each repo.
-We wanted to merge their histories so that we can have all our commits on the same branch as they were originally. 
-We cannot retain the commit hash as the folder structure has changed, but we want to retain all our commit messages. 
-
-We also have many feature branches but they were mostly independent, so merging wasn't required for them. 
+At [GreyOrange](https://www.greyorange.com), we maintain a `develop` branch and certain `release` branches for each repo.
+We were required to merge all the respective commits on develop and release branches as well.
+We wanted to merge their histories such that we can have all our commits on the same branch as they were originally. 
+We also had many feature branches but they were mostly independent, so merging wasn't required for them. 
 
 ## A bit about git 
 
@@ -70,8 +70,13 @@ Running `git init` creates a new `.git` directory. This directory contains every
 ### `objects` directory
 
 The `objects` directory inside `.git` contains all the blobs, trees and commits. 
+These are the 3 basic elements that defines all the `git` functionality. 
+
 Blobs are a type of data structure that contains compressed information related to the changed files. 
 Each time you run `git add .`, a new blob is created inside the `objects` directory. 
+You can view a blob contents using `git cat-file`. 
+
+> Blobs are just the changed files hashed using `SHA-1`
 
 ```bash
 > ls .git/objects
@@ -98,9 +103,11 @@ test
 ```
 
 Multiple blobs are combined together to form a tree data structure. 
-Generally, this happens before a commit.
-But you can run `git write-tree` to generate a tree of recent blobs. 
+Generally, trees are created during a commit.
+But you can run `git write-tree` to generate a tree of recently added blobs. 
 These trees are also stored inside the `objects` directory.
+
+> Trees are like the directories containing the blobs and other trees. 
 
 ```bash
 > git write-tree    # This outputs the hash associated with the tree generated
@@ -117,8 +124,9 @@ bac5fc9c69776a5c67daa2225ef9b2e1edd4f6
 # 0c2c5f... is the hash of the blob created above
 ```
 
-A tree represents the state of the system. Commits are just hashed trees. 
-They are also stored in the same manner. 
+So a tree represents the state of the system.
+Each commit is just 1 tree which is hashed and stored along with other information like author & date. 
+They are also stored in the same manner.
 
 ```bash
 > git commit -m "initial commit"
@@ -138,7 +146,7 @@ A commit just contains the recent tree hash and inforamtion on author, time and 
 ### `refs` directory
 
 The `refs` directory contains the reference to commits. 
-There are 2 types of reference - branch and tags. 
+There are 2 types of reference - `branch` and `tags`. 
 Tags identify a unique commit while branch points to the latest child along the commit tree. 
 
 ```bash
@@ -185,8 +193,8 @@ This is a safety net. You can easily retrieve your work even after a rebase.
 
 [`filter-branch`](https://git-scm.com/docs/git-filter-branch) can be used to rewrite the entire history of a file. 
 This will create a new blob, tree and commit for everything once again. 
-Rewriting history will not hamper the commit data. 
-Hashes will change but the entire inforamtion about the author, committer, etc will remain unchanged. 
+Rewriting history using the `filter-branch` does not hamper the commit data. 
+Hashes will change but the entire inforamtion about the author, committer, etc remains unchanged. 
 
 ```bash
 # For all the commits do this -> mkdir nested; mv test.txt nested/test.txt
@@ -455,6 +463,8 @@ There are many such merger tools available online, we used [monorepo-tools by sh
 There were several tweaks we did for our use case. One was, by default this tool only merges the `master` branch. 
 And here we are trying to merge the `main` branch so we'll need to update the `shopsys` repo to do this. 
 
+> Under the hood, monorepo-tools is using the same commands described above. 
+
 ```bash
 # Replace master by main in monorepo files
 # Run this inside the shopsys monorepo-tools directory
@@ -485,9 +495,10 @@ Let's see how you can merge 2 repos using shopsys monorepo-tools now.
 ```
 
 This is how easy it is to merge multiple repos using shopsys monorepo-tools. 
-There are variety of other things that you can do with this tool like splitting a repo into multiple repos (reverse of what we did here). 
+There are variety of other things that you try with this tool like splitting a repo into multiple repos (reverse of what we did here). 
+Not exploring this here.
 
-Let's verify !!!
+Let's verify if everything worked !!!
 
 ```bash
 > tree .
@@ -495,7 +506,7 @@ Let's verify !!!
 ├── repo1
 │   └── README.md
 └── repo2
-    └── README.md
+    └── README.md   # Both the repositories are under their sub-directories
 
 > git log --oneline
 ad3f765 (HEAD -> main) merge multiple repositories into a monorepo
@@ -508,16 +519,16 @@ ad3f765 (HEAD -> main) merge multiple repositories into a monorepo
 > git cat-file -p ad3f765 | grep tree
 tree 630e5e1c57649efcd9929baa790768927783659e
 > git cat-file -p 630e5e1c57649efcd9929baa790768927783659e
-040000 tree d83102ebb26f925b8e087c821e49ca910f1750a6	repo1
-040000 tree 7801ea011e82b38c3f3de145571ad75536d5bd5c	repo2
+040000 tree d83102ebb26f925b8e087c821e49ca910f1750a6	repo1   # Check
+040000 tree 7801ea011e82b38c3f3de145571ad75536d5bd5c	repo2   # Check
 > git cat-file -p d83102ebb26f925b8e087c821e49ca910f1750a6
-100644 blob 142ee887e3184237ac17f918498bda405eeb5fc1	README.md
+100644 blob 142ee887e3184237ac17f918498bda405eeb5fc1	README.md   # Check
 > git cat-file blob 142ee887e3184237ac17f918498bda405eeb5fc1
 # test-repo-1
 
 This is a test repository.
 > git cat-file -p 7801ea011e82b38c3f3de145571ad75536d5bd5c
-100644 blob 18c9019fe2e7d5e8151db4cb5f1d10307c8547ec	README.md
+100644 blob 18c9019fe2e7d5e8151db4cb5f1d10307c8547ec	README.md   # Check
 This is a test repository.
 > git cat-file blob 18c9019fe2e7d5e8151db4cb5f1d10307c8547ec
 # test-repo-2
@@ -547,3 +558,4 @@ Everything seems perfect.
 Merging of multiple repos into a monorepo structure can be accomplished by rewriting `git` histories.
 This can be done manually by fetching a repo and tweaking the git index believing it belongs to a subdirectory rather than the main repo itself. 
 Another way is by using open source tools like [shopsys monorepo tools](https://github.com/shopsys/monorepo-tools) using which merging can be done in a few steps.
+More tweaks can be done with `monorepo-tools` to merge multiple branches and create a higher level `POM` inside every commit. 
