@@ -6,14 +6,28 @@ draft:
 ---
 import BlogImage from "@components/BlogImage.astro"
 
+## Contents
+
+| Topics | Description |
+| ------ | ----------- |
+| [The Problem](#the-problem) | Merge multiple git repos as one retaining all the histories |
+| [A bit about git](#a-bit-about-git) | Introduction on blob, tree and commits |
+| [Rewriting history](#rewriting-history) | Rewriting histories using filter-branch. Moving a file inside a directory while retaining git histories |
+| [Merging multiple repos into one](#merging-multiple-repos-into-one) | Step by step process on merging 2 git repos into a larger parent repo retaining histories |
+| [Merging using Shopsys monorepo-tools](#merging-using-shopsys-monorepo-tools) | Merging 2 git repos into a larger larger parent repo using monorepo tools by shopsys |
+| [Conclusion](#conclusion) | Final words |
+
+
 ## The Problem
 
-In our company, we were having multiple maven projects that were dependent on each other. 
-And for every project we were maintaining a separate `git` repository hosted on Bitbucket.
+In our company, we had multiple maven projects that were dependent on each other. 
+And for every project we maintianed a separate `git` repository hosted on Bitbucket.
 
-Due to certain use-case, we wanted to migrate all our Bitbucket repos to GitHub. 
-And to avoid any circular dependency issue we also wanted to combine all these related repos into a mono-repo system. 
-We wanted to combine all these repos as a subdirectory of a larger parent project (which in our case was a maven parent). 
+Due to a certain use-case, we wanted to migrate all our Bitbucket repos to GitHub. 
+And to avoid any circular dependency issue, we also wanted to combine all these related repos into a mono-repo system. 
+We wanted to combine all these repos as a subdirectory of a new larger parent project. 
+
+> Things described here will work for any project using git version control irrespective of the hosting platform.
 
 #### `Folder structure`
 ```bash
@@ -35,26 +49,28 @@ parent
 ```
 
 Combining the repos is the easier part. 
-All you need to do is create a master `POM.XML` that will contain all the sub-repos as submodules. 
+As we are using maven, all you require to do is create a master `POM.XML` that will contain all the sub-repos as submodules. 
+
+> Again, the steps defined here are not dependent on maven or any other package manager.
 
 The difficult part is retaining all the histories. 
 As each repository has it's own `.git`, removing this will delete all the associated histories.
-After which we won't be able to identify the code changes, commits and most importantly the branches. 
+After which we won't be able to identify the code changes, commits and, most importantly the branches. 
 
-At GreyOrange, we maintian a `develop` branch and certain `release` branches for each repo.
+At GreyOrange, we maintain a `develop` branch and certain `release` branches for each repo.
 We wanted to merge their histories so that we can have all our commits on the same branch as they were originally. 
-We cannot retain the commit hash as the folder structure has changed but we want all our commit messages. 
+We cannot retain the commit hash as the folder structure has changed, but we want to retain all our commit messages. 
 
-We also had many feature branches but they were mostly independent so merging wasn't required for them. 
+We also have many feature branches but they were mostly independent, so merging wasn't required for them. 
 
 ## A bit about git 
 
-Running `git init` creates a new `.git` directory. This directory contains everything `git` needs to do it's work.
+Running `git init` creates a new `.git` directory. This directory contains everything `git` needs to do it's magic.
 
 ### `objects` directory
 
 The `objects` directory inside `.git` contains all the blobs, trees and commits. 
-Blobs are a type of data structure contains a compressed info related to the changed files. 
+Blobs are a type of data structure that contains compressed information related to the changed files. 
 Each time you run `git add .`, a new blob is created inside the `objects` directory. 
 
 ```bash
@@ -69,22 +85,22 @@ info/     pack/
 # adding changes creates blob of the changed files
 > git add .
 > ls .git/objects
-0c/   info/    pack/      # 0c and 9d are the 2 directories containing the changes
+0c/   info/    pack/      # 0c is the directory containing the changes
 
 > ls .git/objects/0c
 2c5f41c83de09587dfe46d5a5382eddf5bb77f
 # The complete hash of the blob is 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f
 # Note: The first 2 letters are the directory name
 
-# You can also view the contents of the blob
+# You can also view the contents of the blob using cat-file utility
 > git cat-file blob 0c2c5f41c83de09587dfe46d5a5382eddf5bb77f
 test
 ```
 
-Multiple blobs are combined together to form a tree data srructure. 
-Generally this happens before a commit.
+Multiple blobs are combined together to form a tree data structure. 
+Generally, this happens before a commit.
 But you can run `git write-tree` to generate a tree of recent blobs. 
-These trees are also stored inside `objects` directory.
+These trees are also stored inside the `objects` directory.
 
 ```bash
 > git write-tree    # This outputs the hash associated with the tree generated
@@ -112,16 +128,18 @@ They are also stored in the same manner.
 
 > git cat-file -p 5203c0048b4795669114fcdb261dc5bb4e77a54f
 tree 56bac5fc9c69776a5c67daa2225ef9b2e1edd4f6       # This is the hash of the tree we created above
-author Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530
-committer Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530
+author Shubham Kumar <unresolved.shubham@gmail.com> 1670872587 +0530
+committer Shubham Kumar <unresolved.shubham@gmail.com> 1670872587 +0530
 ```
 A commit just contains the recent tree hash and inforamtion on author, time and committer. 
+
+> It's not possible to distinguish a blob, a tree and a commit just by looking at the objects directory.
 
 ### `refs` directory
 
 The `refs` directory contains the reference to commits. 
 There are 2 types of reference - branch and tags. 
-Tags identify a unique commit while branch points to the latest child along the tree. 
+Tags identify a unique commit while branch points to the latest child along the commit tree. 
 
 ```bash
 > ls .git/refs/heads
@@ -141,9 +159,9 @@ dev   master        # Now you can see both the branches
 > git commit -m "commit to dev" --allow-empty
 [dev 9d6d972] commit to dev
 
+# Creating a new commit changes the contents of the active branch.
 > cat .git/ref/heads/dev
 9d6d972066b774e89343e57f2eb053559bf3f22c 
-# Creating a new commit changes the contents of the active branch.
 ```
 
 ### `logs` directory
@@ -163,7 +181,7 @@ This is a safety net. You can easily retrieve your work even after a rebase.
 5203c00 (master) HEAD@{4}: commit (initial): initial commit
 ```
 
-## Rewriting history 
+## Rewriting History 
 
 [`filter-branch`](https://git-scm.com/docs/git-filter-branch) can be used to rewrite the entire history of a file. 
 This will create a new blob, tree and commit for everything once again. 
@@ -181,8 +199,8 @@ Hashes will change but the entire inforamtion about the author, committer, etc w
 
 > git cat-file -p d1950a39cbb6b1212e47d0c5be3b19e023051671  # This I got by looking inside the `objects` dir
 tree 3ea8798ffe7147c04d66c9bef3ac5109ad6e80b8   # New tree reference
-author Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530     # Commit time remained unchanged
-committer Shubham Kumar (Product Architecture) <shubham.kumar@greyorange.com> 1670872587 +0530  
+author Shubham Kumar <unresolved.shubham@gmail.com> 1670872587 +0530     # Commit time remained unchanged
+committer Shubham Kumar <unresolved.shubham@gmail.com> 1670872587 +0530  
 
 initial commit
 
@@ -200,3 +218,332 @@ initial commit
 test
 ```
 
+## Merging multiple repos into one
+
+Merging multiple repositories requires us to take the objects and other entities from one repo and copy it to some other repo.
+For the sake of explaining, I just created 2 test repos - [test-repo-1](https://github.com/unresolvedcold/test-repo-1) and [test-repo-2](https://github.com/unresolvedcold/test-repo-2).
+Both contains a single 'README.MD' file with some content. We'll try merging them into a monorepo system with a parent git and these repos as subdirectories.
+
+```bash
+> cat test-repo-1/README.md
+# test-repo-1
+
+This is a test repository.
+
+> git log --reflog  # To view all the commits
+commit f23153640c79ef57849be2baac14f6daa7b96a1c (HEAD -> main, origin/main, origin/HEAD)
+Author: Shubham Kumar <35415266+UnresolvedCold@users.noreply.github.com>
+Date:   Tue Dec 13 11:02:33 2022 +0530
+
+    Updated README.MD
+
+commit 527ee4e25e8a145448bf799412c369c6cbc8e934
+Author: Shubham Kumar <35415266+UnresolvedCold@users.noreply.github.com>
+Date:   Tue Dec 13 11:01:57 2022 +0530
+
+    Initial commit
+```
+```bash
+> cat test-repo-2/README.md
+# test-repo-2
+
+This is some other test repo.
+
+> git log --reflog  # To view all the commits
+commit 69ed70f51232f81a29a537fb6534e91d1d1ac9c2 (HEAD -> main, origin/main, origin/HEAD)
+Author: Shubham Kumar <35415266+UnresolvedCold@users.noreply.github.com>
+Date:   Tue Dec 13 11:04:00 2022 +0530
+
+    Updated README.MD <repo-2>
+
+commit fe71fde928e17f4adbba0c637a6afc4c503f455a
+Author: Shubham Kumar <35415266+UnresolvedCold@users.noreply.github.com>
+Date:   Tue Dec 13 11:03:12 2022 +0530
+
+    Initial commit
+```
+
+We have 2 git repos with 2 commits on `main` branch. Let's try merging them.
+
+#### `Current folder structure`
+```bash
+.
+├── test-repo-1
+│   ├── .git        # This will be removed
+│   └── README.md
+└── test-repo-2
+    ├── .git        # This will be removed
+    └── README.md
+```
+
+#### `New folder structure`
+```bash
+parent
+├── .git            # New git that will contain all our histories
+├── test-repo-1
+│   └── README.md
+└── test-repo-2
+    └── README.md
+```
+We will create a new git repository. 
+And add the remotes of our repo we want to merge. 
+We want to fetch everything from these repos. This is done by calling `git fetch --all`. 
+Then one by one we can create a new subdirectory for each repository. 
+And atlast, we can manipulate the git history into thinking the codes were present in the subdirectory from the beginning.
+
+```bash
+> git init  # Create a new repository
+
+# Fetch the repos we want to merge 
+> git remote add repo1 git@github.com:UnresolvedCold/test-repo-1.git
+> git remote add repo2 git@github.com:UnresolvedCold/test-repo-2.git
+> git fetch --all
+Fetching repo1
+remote: Enumerating objects: 6, done.
+remote: Counting objects: 100% (6/6), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 6 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (6/6), 1.23 KiB | 180.00 KiB/s, done.
+From github.com:UnresolvedCold/test-repo-1
+ * [new branch]      main       -> repo1/main
+Fetching repo2
+remote: Enumerating objects: 6, done.
+remote: Counting objects: 100% (6/6), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 6 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (6/6), 1.24 KiB | 424.00 KiB/s, done.
+From github.com:UnresolvedCold/test-repo-2
+ * [new branch]      main       -> repo2/main
+```
+
+Now we have everything updated. We can start our merging process. 
+Checkout the branch of the first repository and modify the index file such that repo1 files are inside `repo1` directory. 
+
+```bash
+# Let's start with the first repo main branch
+> git checkout --detach repo1/main
+
+> git ls-files -s   # This is how the file is presently 
+100644 142ee887e3184237ac17f918498bda405eeb5fc1 0	README.md
+
+# We want to move README.md to repo1/README.md
+> git ls-files -s | sed "s-\t\"*-&repo1/-"      # We want to do this for all the commits
+100644 142ee887e3184237ac17f918498bda405eeb5fc1 0	repo1/README.md
+
+# After doing this for all the commits we will update the index file
+> git filter-branch --index-filter '
+     git ls-files -s | sed "s-\t\"*-&repo1/-" | 
+     GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info &&  mv "$GIT_INDEX_FILE.new" "$GIT_INDEX_FILE"' 
+
+> ls -a 
+./    ../    .git/    repo1/   # A new directory called repo1 is created
+
+> ls repo1/
+README.md
+
+# We can see our the first repo contents are inside repo1 directory
+> cat README.md
+# test-repo-1
+
+This is a test repository.
+```
+
+The above looks good. Atleast we can see the files related to repo1 in `repo1` subdirectory. 
+Let's explore the history. It should be a tree called `repo1` with `README.md` inside it.
+
+```bash
+# Let's see the git commit list
+> git log --pretty=format:"%H"
+495e27b84df8e4e6d297b37a03f1c6c0a5fdcc73    # This is the latest commit
+8a5f4f3805be9604b1f96b03df5cf1092363ba91
+
+# Let's view the histories for the latest commit
+> git cat-file -p 495e27b84df8e4e6d297b37a03f1c6c0a5fdcc73
+tree 38eccdd305b8e410a1993391031e948e664d7b1d
+parent 8a5f4f3805be9604b1f96b03df5cf1092363ba91
+author Shubham Kumar <35415266+UnresolvedCold@users.noreply.github.com> 1670909553 +0530
+committer GitHub <noreply@github.com> 1670909553 +0530
+
+Updated README.MD%
+> git cat-file -p 38eccdd305b8e410a1993391031e948e664d7b1d
+040000 tree d83102ebb26f925b8e087c821e49ca910f1750a6	repo1   # Has a directory called repo1
+> git cat-file -p d83102ebb26f925b8e087c821e49ca910f1750a6
+100644 blob 142ee887e3184237ac17f918498bda405eeb5fc1	README.md   # repo1 has README.MD
+
+# Let's quickly check the second commit id
+> git cat-file -p 8a5f4f3805be9604b1f96b03df5cf1092363ba91 | grep tree
+tree 0dc5c3d1b78ed4dcd97120149441a8e3a8d6aefa
+> git cat-file -p 0dc5c3d1b78ed4dcd97120149441a8e3a8d6aefa
+040000 tree cc92c678191b4d3c4731f5d0f9b212532316ef8c	repo1     # Check
+> git cat-file -p cc92c678191b4d3c4731f5d0f9b212532316ef8c
+100644 blob 6a642ba8d3e31ba9a02606da98dd4a73a2d554e2	README.md # Check
+```
+
+We can see the files and commit histories both have been migrated to repo1 succcessfully. 
+Now we can do the same process for repo2. 
+And in case you have some other branch you'll need to loop the process for other branches too.
+
+But first we'll need to delete the original references to create new ones. 
+And we also want to merge the previous reference with the new ones.
+So let's save the current HEAD and delete the references.
+
+```bash
+# Our current HEAD (latest commit in our case)
+> git rev-parse HEAD
+495e27b84df8e4e6d297b37a03f1c6c0a5fdcc73
+
+# Save the current HEAD for merging later on
+> REPO1=$(git rev-parse HEAD)
+
+# Delete the original references
+> git for-each-ref --format="%(refname)" refs/original/
+refs/original/HEAD
+> git update-ref -d refs/original/HEAD
+> git reset --hard
+```
+
+Now we are ready for merging repo2. Again we'll need to reset the HEAD before merging.
+For merging 2 repos, we'll create a new branch called 'main' and will merge both repos main branch one by one. 
+
+```bash
+> git checkout --detach repo2/main
+> git filter-branch --index-filter '
+     git ls-files -s | sed "s-\t\"*-&repo2/-" | 
+     GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info &&  mv "$GIT_INDEX_FILE.new" "$GIT_INDEX_FILE"' 
+
+# Save the reference
+> REPO2=$(git rev-parse HEAD)
+
+# Reset HEAD (again before merging)
+> git update-ref -d refs/original/HEAD
+> git reset --hard
+```
+
+Now we can begin our merging process.
+
+```bash
+> git checkout -b main
+> git merge --no-commit -q $REPO1 $REPO2 --allow-unrelated-histories
+# If no merge conflicts then you can just commit it else you'll need to resolve merge conflicts
+> git commit -m "Migrated"
+
+> tree
+.
+├── repo1
+│   └── README.md
+└── repo2
+    └── README.md
+
+> git log --oneline
+d0b5806 (HEAD -> main) Migrated
+074ef5b Updated README.MD <repo-2>
+025ec51 Initial commit
+495e27b Updated README.MD
+8a5f4f3 Initial commit
+```
+
+This is the basic fundamental on how you can merge 2 repos into one retaining all the commit histories.
+Now, ofcourse we never want to manually redo this for all the repos & for all the branches.
+A script would be helpful.
+
+## Merging using Shopsys monorepo-tools
+
+And as they say,
+> Don't reinvent the wheel.
+
+There are many such merger tools available online, we used [monorepo-tools by shopsys](https://github.com/shopsys/monorepo-tools). 
+There were several tweaks we did for our use case. One was, by default this tool only merges the `master` branch. 
+And here we are trying to merge the `main` branch so we'll need to update the `shopsys` repo to do this. 
+
+```bash
+# Replace master by main in monorepo files
+# Run this inside the shopsys monorepo-tools directory
+> for f in $(find *.sh); do c=$(cat $f | sed 's/master/main/g'); echo $c>$f ;done
+
+# sed 's/master/main/g' $f > $f should work on Linux based system 
+# but on MAC it just deletes all the contents of my file.
+```
+
+Let's see how you can merge 2 repos using shopsys monorepo-tools now.
+
+```bash
+# First clone the shopsys repo
+> git clone git@github.com:shopsys/monorepo-tools.git
+
+# Create a new repo
+> mkdir parent
+> cd parent
+> git init
+
+# Add the remotes and fetch
+> git remote add repo1 git@github.com:UnresolvedCold/test-repo-1.git
+> git remote add repo2 git@github.com:UnresolvedCold/test-repo-2.git
+> git fetch --all
+
+# Run Shopsys mono-repo tool
+> ../monorepo-tools/monorepo_build.sh repo1 repo2
+```
+
+This is how easy it is to merge multiple repos using shopsys monorepo-tools. 
+There are variety of other things that you can do with this tool like splitting a repo into multiple repos (reverse of what we did here). 
+
+Let's verify !!!
+
+```bash
+> tree .
+.
+├── repo1
+│   └── README.md
+└── repo2
+    └── README.md
+
+> git log --oneline
+ad3f765 (HEAD -> main) merge multiple repositories into a monorepo
+074ef5b Updated README.MD <repo-2>
+025ec51 Initial commit
+495e27b Updated README.MD
+8a5f4f3 Initial commit
+
+# Explore the latest commit
+> git cat-file -p ad3f765 | grep tree
+tree 630e5e1c57649efcd9929baa790768927783659e
+> git cat-file -p 630e5e1c57649efcd9929baa790768927783659e
+040000 tree d83102ebb26f925b8e087c821e49ca910f1750a6	repo1
+040000 tree 7801ea011e82b38c3f3de145571ad75536d5bd5c	repo2
+> git cat-file -p d83102ebb26f925b8e087c821e49ca910f1750a6
+100644 blob 142ee887e3184237ac17f918498bda405eeb5fc1	README.md
+> git cat-file blob 142ee887e3184237ac17f918498bda405eeb5fc1
+# test-repo-1
+
+This is a test repository.
+> git cat-file -p 7801ea011e82b38c3f3de145571ad75536d5bd5c
+100644 blob 18c9019fe2e7d5e8151db4cb5f1d10307c8547ec	README.md
+This is a test repository.
+> git cat-file blob 18c9019fe2e7d5e8151db4cb5f1d10307c8547ec
+# test-repo-2
+
+This is some other test repo.
+
+# We can also verify commits 074ef5b and 495e27b to see if README.md is inside their respective folders
+> git cat-file -p 074ef5b | grep tree
+tree 057f76982f62d051ed841e43c09536d3f3c61980
+> git cat-file -p 057f76982f62d051ed841e43c09536d3f3c61980
+040000 tree 7801ea011e82b38c3f3de145571ad75536d5bd5c	repo2     # Check
+> git cat-file -p 7801ea011e82b38c3f3de145571ad75536d5bd5c
+100644 blob 18c9019fe2e7d5e8151db4cb5f1d10307c8547ec	README.md # Check
+
+> git cat-file -p 495e27b | grep tree
+tree 38eccdd305b8e410a1993391031e948e664d7b1d
+> git cat-file -p 38eccdd305b8e410a1993391031e948e664d7b1d
+040000 tree d83102ebb26f925b8e087c821e49ca910f1750a6	repo1     # Check
+> git cat-file -p d83102ebb26f925b8e087c821e49ca910f1750a6
+100644 blob 142ee887e3184237ac17f918498bda405eeb5fc1	README.md # Check
+```
+
+Everything seems perfect. 
+
+## Conclusion
+
+Merging of multiple repos into a monorepo structure can be accomplished by rewriting `git` histories.
+This can be done manually by fetching a repo and tweaking the git index believing it belongs to a subdirectory rather than the main repo itself. 
+Another way is by using open source tools like [shopsys monorepo tools](https://github.com/shopsys/monorepo-tools) using which merging can be done in a few steps.
