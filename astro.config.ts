@@ -5,6 +5,7 @@ import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
 import image from "@astrojs/image";
 import astroLayouts from "astro-layouts";
+import { remarkReadingTime } from './src/library/remark/remark-reading-time.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,6 +14,8 @@ export default defineConfig({
     shikiConfig: {
       theme: "dracula",
     },
+    remarkPlugins: [remarkReadingTime],
+    extendDefaultPlugins: true,
   },
   
   base: "/",

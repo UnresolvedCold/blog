@@ -23,7 +23,7 @@ blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Dat
   </section>
   <section>
     <ul class="flex flex-col justify-center py-5">
-      {blogs.map((post) => <BlogCard title={post.frontmatter.title} description={post.frontmatter.description} pubDate={post.frontmatter.pubDate} url={post.url} />)}
+      {blogs.map((post) => <BlogCard title={post.frontmatter.title} description={post.frontmatter.description} pubDate={post.frontmatter.pubDate} url={post.url} minutesRead={post.frontmatter.minutesRead}/>)}
     </ul>
   </section>
 </Layout>
