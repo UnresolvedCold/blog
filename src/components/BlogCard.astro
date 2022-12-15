@@ -15,7 +15,7 @@ const shortDate = new Date(pubDate).toLocaleDateString("en", {
 url = url + "/";
 ---
 
-<li class="flex flex-col gap-2 sm:grid-cols-4 leading-relaxed rounded-2xl border-zinc-700 dark:text-zinc-400">
+<li class="hidden sm:flex flex-col gap-2 sm:grid-cols-4 leading-relaxed rounded-2xl border-zinc-700 dark:text-zinc-400">
   <a class="col-span-3 flex flex-col gap-2 sm:gap-4 p-5 my-2 hover:dark:bg-zinc-800 hover:bg-zinc-200 rounded-lg transition-colors" href={url}>
     <span class="flex items-center justify-between mb-1">
       <span>
@@ -32,6 +32,25 @@ url = url + "/";
           </span>  
         </p>
       </span>
+    </span>
+  </a>
+</li>
+
+<li class="flex sm:hidden flex-col gap-2 sm:grid-cols-4 leading-relaxed rounded-2xl border-zinc-700 dark:text-zinc-400">
+  <a class="col-span-3 flex flex-col gap-2 sm:gap-4 p-5 my-2 hover:dark:bg-zinc-800 hover:bg-zinc-200 rounded-lg transition-colors" href={url}>
+    <span class="flex flex-col mb-1">
+      <h2 class="text-xl text-black text-center dark:text-white">{title}</h2>
+      <span class="shrink-0 flex flex-row justify-between">
+        <span class="shrink-0 text-base text-center">{shortDate}</span>
+        <span class="shrink-0 text-base flex flex-row">
+          <Icon name={"eva:book-open-outline"}
+                class="w-5 text-black dark:text-zinc-400"/>
+          <span class="ml-1">
+            {minutesRead}
+          </span>  
+        </span>
+      </span>
+      <p class="text-base text-justify text-black dark:text-zinc-300">{description}</p>
     </span>
   </a>
 </li>
