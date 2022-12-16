@@ -112,8 +112,7 @@ const canonicalURL = new URL(Astro.url).href;
         <footer class="flex flex-row justify-between mt-16 text-lg">
           <a href="/posts" class="dark:text-blue-400 text-blue-600">Back to posts</a>
         </footer>
-        {theme}
-        <CommentSection theme={theme}} client:load/>
+        <CommentSection theme="preferred-color-scheme" client:load/>
       </section>
     </main>
   </body>
