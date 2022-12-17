@@ -8,7 +8,7 @@ export default function CommentSection({theme}) {
       repoId="R_kgDOIm2RAw"
       category="Show and tell"
       categoryId="DIC_kwDOIm2RA84CTIEN"
-      mapping="pathname"
+      mapping="url"
       term="Welcome to @giscus/react component!"
       reactionsEnabled="1"
       emitMetadata="0"
