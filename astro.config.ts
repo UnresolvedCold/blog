@@ -18,7 +18,6 @@ export default defineConfig({
     remarkPlugins: [remarkReadingTime],
     extendDefaultPlugins: true
   },
-  output: 'server',
   base: "/",
   integrations: [compress({
     css: true,
