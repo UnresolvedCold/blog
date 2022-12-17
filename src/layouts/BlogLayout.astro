@@ -2,7 +2,7 @@
 import "@fontsource/inter";
 import Header from "@components/Header.astro";
 import { Icon } from "astro-icon";
-import CommentSection from "@components/CommentSection.svelte"
+import CommentSection from "@components/CommentSection.jsx"
 
 let { pubDate } = Astro.props.content;
 const { frontmatter } = Astro.props;
@@ -112,7 +112,7 @@ const canonicalURL = new URL(Astro.url).href;
         <footer class="flex flex-row justify-between mt-16 text-lg">
           <a href="/posts" class="dark:text-blue-400 text-blue-600">Back to posts</a>
         </footer>
-        <CommentSection theme="preferred-color-scheme" client:load/>
+        <CommentSection theme="https://syrovatskiy.tk/styles/giscus-dark.css" client:load/>
       </section>
     </main>
   </body>

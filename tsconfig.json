@@ -1,13 +1,27 @@
 {
   "compilerOptions": {
-    "types": ["astro/images/client"],
+    "types": [
+      "astro/images/client"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@components/*": ["src/components/*"],
-      "@layouts/*": ["src/layouts/*"],
-      "@content/*": ["src/content/*"],
-      "@images/*": ["src/images/*"],
-      "@library/*": ["src/library/*"],
-    }
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@layouts/*": [
+        "src/layouts/*"
+      ],
+      "@content/*": [
+        "src/content/*"
+      ],
+      "@images/*": [
+        "src/images/*"
+      ],
+      "@library/*": [
+        "src/library/*"
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }
