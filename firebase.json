@@ -1,13 +1,13 @@
 {
     "hosting": {
       "public": "dist",
-      "ignore": []
-    },
-    "headers": [ {
-      "source" : "**",
-      "headers" : [ {
-        "key" : "Access-Control-Allow-Origin",
-        "value" : "*"
-      } ]
-    }]
+      "ignore": [],
+      "headers": [ {
+        "source" : "**",
+        "headers" : [ {
+          "key" : "Access-Control-Allow-Origin",
+          "value" : "*"
+        } ]
+      }]
+    }
   }
