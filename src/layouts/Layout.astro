@@ -15,9 +15,9 @@ const canonicalURL = new URL(Astro.url).href;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/unresolvedcold-icon-github.jpeg" />
+    <link rel="icon" type="image/svg+xml" href="/icon.png" />
     <title>{title}</title>
-    <link rel="sitemap" href="/sitemap-index.xml">
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="canonical" href={canonicalURL} />
     <meta name="title" content={title} />
     <meta name="description" content={description} />
@@ -40,13 +40,18 @@ const canonicalURL = new URL(Astro.url).href;
     <script is:inline>
       // credits to satnaing on github
       const primaryColorScheme = "none";
-      const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const darkModeMediaQuery = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
       const currentTheme = localStorage.getItem("theme");
       let theme;
       if (currentTheme) {
         theme = currentTheme === "dark" ? "dark" : "";
       } else {
-        if (primaryColorScheme === "dark" || (primaryColorScheme === "none" && darkModeMediaQuery)) {
+        if (
+          primaryColorScheme === "dark" ||
+          (primaryColorScheme === "none" && darkModeMediaQuery)
+        ) {
           theme = "dark";
         } else if (primaryColorScheme === "light") {
           theme = "";
@@ -70,14 +75,24 @@ const canonicalURL = new URL(Astro.url).href;
       });
     </script>
   </head>
-  <body class="font-inter text-xl dark:bg-zinc-900 dark:text-white transition-colors motion-reduce:transition-none selection:bg-sky-600/60 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-300 dark:scrollbar-thumb-zinc-600 dark:scrollbar-track-zinc-800">
+  <body
+    class="font-inter text-xl dark:bg-zinc-900 dark:text-white transition-colors motion-reduce:transition-none selection:bg-sky-600/60 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-300 dark:scrollbar-thumb-zinc-600 dark:scrollbar-track-zinc-800"
+  >
     <Header />
     <main class="m-auto px-8 max-w-4xl">
       <slot />
     </main>
     <footer class="flex flex-row justify-center my-10 text-lg">
       <p class="text-xs">
-        <a href="https://www.shubham.codes" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">Shubham Kumar</a> - Made using <a class="text-blue-600 dark:text-blue-400 hover:underline" href="https://github.com/lancerossdev/astro-basic-blog">lanceross</a> astro template
+        <a
+          href="https://www.shubham.codes"
+          target="_blank"
+          class="text-blue-600 dark:text-blue-400 hover:underline"
+          >Shubham Kumar</a
+        > - Made using <a
+          class="text-blue-600 dark:text-blue-400 hover:underline"
+          href="https://github.com/lancerossdev/astro-basic-blog">lanceross</a
+        > astro template
       </p>
     </footer>
   </body>
