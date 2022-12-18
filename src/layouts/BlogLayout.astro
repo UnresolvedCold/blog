@@ -40,16 +40,16 @@ const canonicalURL = new URL(Astro.url).href;
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={frontmatter.title} />
     <meta property="og:description" content={frontmatter.description} />
-    <meta property="og:image" content={`https://open-graph-images-qycoxojbe-unresolvedcold.vercel.app/api/shubhamcodes_blog?title=${ogImageParams}`} />
+    <meta property="og:image" content={`https://open-graph-images-qycoxojbe-unresolvedcold.vercel.app/api/shubhamcodes_blog?${ogImageParams}`} />
     <meta property="og:site_name" content="shubham.codes" />
     <meta property="og:locale" content="en_US" />
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
-    <meta name="twitter:site" content="@schwiftycold" />
+    <meta name="twitter:site" content="shubham.codes" />
     <meta name="twitter:creator" content="@schwiftycold" />
     <meta property="twitter:title" content={frontmatter.title} />
     <meta property="twitter:description" content={frontmatter.description} />
-    <meta property="twitter:image" content={`/og?${ogImageParams}`} />
+    <meta property="twitter:image" content={`https://open-graph-images-qycoxojbe-unresolvedcold.vercel.app/api/shubhamcodes_blog?${ogImageParams}`} />
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content="Shubham Kumar" />
     <script is:inline>
