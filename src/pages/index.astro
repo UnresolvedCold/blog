@@ -3,7 +3,6 @@ import Layout from "@layouts/Layout.astro";
 import BlogCard from "@components/BlogCard.astro";
 import Subscribe from "@components/Subscribe.astro";
 import { Picture } from "@astrojs/image/components";
-import SchwiftyCold from "@images/SchwiftyCold.png";
 
 interface Frontmatter {
   title: string;
@@ -24,7 +23,7 @@ blogs = blogs.sort(
 <Layout title="Blog Index" description="Shubham's Blog">
   <section class="flex flex-col sm:flex-row justify-evenly items-center py-14">
     <Picture
-      src={SchwiftyCold}
+      src="/profile.png"
       class="rounded-full overflow-hidden inline-flex sm:m-8"
       alt="Shubham"
       aspectRatio="1:1"
