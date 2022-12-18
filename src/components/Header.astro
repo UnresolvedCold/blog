@@ -23,7 +23,7 @@ const icons = [
     icon: "eva:linkedin-outline",
     href: "https://linkedin.com/in/schwiftycold",
   },
-  
+
   {
     name: "RSS",
     href: "/rss.xml",
@@ -37,8 +37,8 @@ const icons = [
 >
   <a
     href="/"
-    class="text-2xl text-black dark:text-zinc-300 hover:dark:text-white transition-colors motion-reduce:transition-none absolute m-8"
-    >shubham.codes</a
+    class="flex h-8 w-8 text-2xl text-black dark:text-zinc-300 hover:dark:text-white transition-colors motion-reduce:transition-none absolute m-8"
+    ><img class="object-scale-down mr-2" src="/icon.png" alt="blog icon" /> shubham.codes</a
   >
   <nav class="p-8">
     <ul class="flex justify-end items-center m-0">
@@ -82,20 +82,19 @@ const icons = [
   <ul class="flex justify-center items-center m-0">
     <li>
       <ul class="flex flex-row space-x-4">
-            {
-            icons.map((mobile) => (
-              <li class="sm:hidden">
-                <a href={mobile.href}>
-                  <Icon
-                    name={mobile.icon}
-                    class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none"
-                  />
-                </a>
-              </li>
-            ))
-          }
+        {
+          icons.map((mobile) => (
+            <li class="sm:hidden">
+              <a href={mobile.href}>
+                <Icon
+                  name={mobile.icon}
+                  class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none"
+                />
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </li>
   </ul>
-          
 </header>
