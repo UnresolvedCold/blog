@@ -40,8 +40,8 @@ const canonicalURL = new URL(Astro.url).href;
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={frontmatter.title} />
     <meta property="og:description" content={frontmatter.description} />
-    <meta property="og:image" content={`/og?${ogImageParams}`} />
-    <meta property="og:site_name" content="Shubham's blog" />
+    <meta property="og:image" content={`https://open-graph-images-qycoxojbe-unresolvedcold.vercel.app/api/shubhamcodes_blog?title=${ogImageParams}`} />
+    <meta property="og:site_name" content="shubham.codes" />
     <meta property="og:locale" content="en_US" />
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
