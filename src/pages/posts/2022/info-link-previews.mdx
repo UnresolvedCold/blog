@@ -1,20 +1,137 @@
 ---
-title: A note on link previews and how to have them on your site
+title: A note on creating dynamic link previews for your website or blog
 description: This is a little blog post on how to dynamically add a preview of your website while posting on social media
 pubDate: 2022-12-19T01:43:22+0530
 draft: false
-keywords: link, 
+keywords: link-preview, open graph, twitter, facebook, twitter cards, telegram, whatsapp, link sharing, ngrok, localhost.run, python, python3, port forwarding, reverse tunneling, opengraph.xyz, localhost, hosting, templating. templating og
 ---
-import BlogImageWithContext from "@components/BlogImageWithContext.astro"
-import LinkPreviewDemo from '@images/posts/2022/info-link-previews/link-preview-demo.png'
+
+import BlogImageWithContext from "@components/BlogImageWithContext.astro";
+import LinkPreviewDemo from "@images/posts/2022/info-link-previews/link-preview-demo.png";
+import OpenGrapgDebugging from "@images/posts/2022/info-link-previews/opengraph-debugging.png";
+import OpenGrapgDebuggingPreview from "@images/posts/2022/info-link-previews/opengraph-debugging-preview.png";
 
 ## General Introduction
 
-You can add a preview of the link you share using social media apps.
-This makes it possible for the reader to have a good idea of what's inside the content. 
+Using social networking apps, you can add a preview to the URL you share.
+As a result, the reader can get a decent notion of the contents.
 
 <BlogImageWithContext src={LinkPreviewDemo} aspectRatio="1" width="200">
-    The link shared on Dec 18 shows a preview consisting of a title and description. 
-    The link shared on Dec 20 extends this preview by adding an image.
-    This image is dynamically created by the server on receiving the request from the social media app.
+  <div>
+    The link shared on Dec 18 shows a preview consisting of a title and
+    description.
+  </div>
+  <div>The link shared on Dec 20 extends this preview by adding an image.</div>
+  <div>
+    This image is dynamically created by the server on receiving the request
+    from the social media app.
+  </div>
 </BlogImageWithContext>
+
+#### A bit of history
+
+Facebook launched open graph protocol in 2010.
+This made it possible for the creator to distribute certain data for social media use.
+This is done using the `meta` tags.
+Later on, Twitter launched its own tags for Twitter cards.
+So now, Twitter and Telegram follow Twitter's meta tags, while Facebook and WhatsApp follow Open Graph's protocol.
+Twitter respects the Open Graph protocol if Twitter tags are missing.
+But it's always good to have both versions defined.
+
+## Defining meta tags
+
+`meta` tags are defined inside the `head`.
+You can define Open Graph tags using `og:<key>` and Twitter tags using `twitter:<key>`.
+All tags are documented in [Open Graph Documentation](https://ogp.me/) and [Twitter Cards Documentation](https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started).
+Here, I will restrict myself to `title`, `description`, `image` & `url` tags as our main focus is on creating dynamic images of a website.
+
+Let's see how to define meta tags.
+For this, you can create a simple `HTML` site with the following contents.
+
+#### `link-preview.html`
+
+```html
+<html>
+  <head>
+    <!-- Open Graph metas -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="a test url" />
+    <meta property="og:title" content="My first link preview" />
+    <meta property="og:description" content="Learning link previews" />
+    <meta
+      property="og:image"
+      content="https://live.staticflickr.com/7504/16258492451_3a097a932a_k.jpg"
+    />
+
+    <!-- Twitter metas -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="a test url" />
+    <meta name="twitter:site" content="shubham.codes" />
+    <meta name="twitter:creator" content="@schwiftycold" />
+    <meta property="twitter:title" content="My first link preview" />
+    <meta property="twitter:description" content="Learning link previews" />
+    <meta
+      property="twitter:image"
+      content="https://live.staticflickr.com/7504/16258492451_3a097a932a_k.jpg"
+    />
+  </head>
+</html>
+```
+
+I'm calling it `link-preview.html`.
+I want to show the title of the preview as "My first link preview".
+We will use the image hosted by [IG](https://flic.kr/ps/jAWKs) as [Cool JavaScript Code at Game Jam](https://flic.kr/p/qLH2nn) under [Creative Commons License](https://creativecommons.org/licenses/by/2.0/).
+Later on, we will dynamically display the title on this image.
+
+## Viewing & Debuggig
+
+You can use [opengraph.xyz](https://www.opengraph.xyz/) to view your previews.
+Some of the previews I saw on `opengraph.xyz` weren't exactly like what I saw on social media sites.
+But for us, it's a handy tool to verify our previews.
+
+We need a public link to our website for this to work.
+Let's create a simple python http server to serve our 'HTML' file.
+
+```bash
+# List the files in the present directory
+> ls
+link-preview.html
+
+# Start a python server to serve our files to localhost:8000
+> python3 -m http.server 8000
+```
+
+Now, you can browse the contents in the directory by visiting http://localhost:8000
+
+Let's use 'locahost.run' or 'ngrok' to make this public.
+Since there is no need for installation, I'm using `localhost.run`.
+Run the below command to forward your port `8000` to `localhost.run`.
+This will generate a new public link for your local server.
+You can verify this by browsing the link.
+
+```bash
+> ssh -R 80:localhost:8080 nokey@localhost.run
+
+===============================================================================
+Welcome to localhost.run!
+
+Follow your favourite reverse tunnel at [https://twitter.com/localhost_run].
+...
+dbf7d61ace7a14.lhr.life tunneled with tls termination, https://dbf7d61ace7a24.lhr.life
+```
+
+My public link is **https://dbf7d61ace7a24.lhr.life**.
+I can view my html site by visiting **https://dbf7d61ace7a24.lhr.life/link-preview.html**.
+
+Let's feed this url to [opengrapth.xyz](https://www.opengraph.xyz/).
+
+<BlogImageWithContext src={OpenGrapgDebugging} aspectRatio="16/9" width="768" />
+
+The right hand side shows you the preview on `Facebook`, `Twitter`, `Linkedin` and `Discord`.
+
+<BlogImageWithContext src={OpenGrapgDebuggingPreview}>
+  This looks great. The image looks perfect. The provided title and description
+  are also shown as expected.
+</BlogImageWithContext>
+
+## Make it dynamic
