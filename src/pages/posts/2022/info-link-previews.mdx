@@ -3,9 +3,18 @@ title: A note on link previews and how to have them on your site
 description: This is a little blog post on how to dynamically add a preview of your website while posting on social media
 pubDate: 2022-12-19T01:43:22+0530
 draft: false
+keywords: link, 
 ---
+import BlogImageWithContext from "@components/BlogImageWithContext.astro"
+import LinkPreviewDemo from '@images/posts/2022/info-link-previews/link-preview-demo.png'
 
-## What are link previews
+## General Introduction
 
-You can view a preview of the link you share using social media apps.
-This makes it possible for the reader to preview the article before opening it.
+You can add a preview of the link you share using social media apps.
+This makes it possible for the reader to have a good idea of what's inside the content. 
+
+<BlogImageWithContext src={LinkPreviewDemo} aspectRatio="1" width="200">
+    The link shared on Dec 18 shows a preview consisting of a title and description. 
+    The link shared on Dec 20 extends this preview by adding an image.
+    This image is dynamically created by the server on receiving the request from the social media app.
+</BlogImageWithContext>

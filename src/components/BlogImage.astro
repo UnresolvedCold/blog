@@ -6,7 +6,7 @@ interface Props {
   aspectRatio?: number;
   loading?: "lazy" | "eager";
 }
-const { src, alt, aspectRatio = 16 / 9, loading = "lazy" } = Astro.props;
+const { src, alt, aspectRatio = 16 / 9, loading = "lazy", width=768, height=402 } = Astro.props;
 ---
 
 <Picture
@@ -17,6 +17,6 @@ const { src, alt, aspectRatio = 16 / 9, loading = "lazy" } = Astro.props;
   loading={loading}
   alt={alt}
   class="rounded-xl overflow-hidden"
-  width={768}
-  height={402}
+  width={width}
+  height={height}
 />

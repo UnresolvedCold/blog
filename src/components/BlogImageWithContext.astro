@@ -1,0 +1,46 @@
+---
+import { Picture } from "@astrojs/image/components";
+interface Props {
+  src: string;
+  alt: string;
+  aspectRatio?: number;
+  loading?: "lazy" | "eager";
+  width: number;
+  height: number;
+}
+const { src, alt, aspectRatio = 1, loading = "lazy", width=250, height=400 } = Astro.props;
+---
+
+<div class="hidden sm:flex flex-row justify-center items-end" >
+    <Picture
+    widths={[1024]}
+    sizes="(max-width: 800px) 90vw, 768px"
+    aspectRatio={aspectRatio}
+    src={src}
+    loading={loading}
+    alt={alt}
+    class="flex-1 rounded-xl overflow-hidden"
+    width={width}
+    height={height}
+    />
+    <span class="flex-1 ml-10 mt-5 mb-5">
+        <slot />
+    </span>
+</div>
+
+<div class="sm:hidden flex flex-col justify-center items-center" >
+  <Picture
+  widths={[1024]}
+  sizes="(max-width: 800px) 90vw, 768px"
+  aspectRatio={aspectRatio}
+  src={src}
+  loading={loading}
+  alt={alt}
+  class="flex-1 rounded-xl overflow-hidden"
+  width={width}
+  height={height}
+  />
+  <span class="flex-1">
+      <slot />
+  </span>
+</div>
