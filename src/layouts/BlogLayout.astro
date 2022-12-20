@@ -11,6 +11,7 @@ export interface Props {
   description?: string;
   image?: string;
   ImageAlt?: string;
+  keywords: string;
 }
 
 const thisDate = new Date(pubDate).toLocaleDateString("en", {
@@ -52,6 +53,7 @@ const canonicalURL = new URL(Astro.url).href;
     <meta property="twitter:image" content={`https://open-graph-images-qycoxojbe-unresolvedcold.vercel.app/api/shubhamcodes_blog?${ogImageParams}`} />
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content="Shubham Kumar" />
+    <meta name="keywords" content={frontmatter.keywords} /> 
     <script is:inline>
       // credits to satnaing on github
       const primaryColorScheme = "none";
