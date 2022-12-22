@@ -7,10 +7,12 @@ keywords: link-preview, open graph, twitter, facebook, twitter cards, telegram, 
 ---
 
 import BlogImageWithContext from "@components/BlogImageWithContext.astro";
+import BlogImage from "@components/BlogImage.astro";
 import LinkPreviewDemo from "@images/posts/2022/info-link-previews/link-preview-demo.png";
 import OpenGrapgDebugging from "@images/posts/2022/info-link-previews/opengraph-debugging.png";
 import OpenGrapgDebuggingPreview from "@images/posts/2022/info-link-previews/opengraph-debugging-preview.png";
 import FlaskAppPreviewImage from "@images/posts/2022/info-link-previews/flask-app-preview-image.png";
+import SlackPreview from "@images/posts/2022/info-link-previews/link-preview-on-slack.png";
 
 ## General Introduction
 
@@ -31,10 +33,10 @@ As a result, the reader can get a decent notion of the contents.
 
 #### A bit of history
 
-Facebook launched open graph protocol in 2010.
+Facebook launched the open graph protocol in 2010.
 This made it possible for the creator to distribute certain data for social media use.
 This is done using the `meta` tags.
-Later on, Twitter launched its own tags for Twitter cards.
+Later on, Twitter launched its tags for Twitter cards.
 So now, Twitter and Telegram follow Twitter's meta tags, while Facebook and WhatsApp follow Open Graph's protocol.
 Twitter respects the Open Graph protocol if Twitter tags are missing.
 But it's always good to have both versions defined.
@@ -42,9 +44,9 @@ But it's always good to have both versions defined.
 ## Defining meta tags
 
 `meta` tags are defined inside the `head`.
-You can define Open Graph tags using `og:<key>` and Twitter tags using `twitter:<key>`.
+You can define Open Graph tags using `og:<key>` and Twitter tags using `Twitter:<key>`.
 All tags are documented in [Open Graph Documentation](https://ogp.me/) and [Twitter Cards Documentation](https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started).
-Here, I will restrict myself to `title`, `description`, `image` & `url` tags as our main focus is on creating dynamic images of a website.
+Here, I will restrict myself to `title`, `description`, `image` & `URL` tags as our main focus is on creating dynamic images of a website.
 
 Let's see how to define meta tags.
 For this, you can create a simple `HTML` site with the following contents.
@@ -91,7 +93,7 @@ Some of the previews I saw on `opengraph.xyz` weren't exactly like what I saw on
 But for us, it's a handy tool to verify our previews.
 
 We need a public link to our website for this to work.
-Let's create a simple python http server to serve our 'HTML' file.
+Let's create a simple python HTTP server to serve our 'HTML' file.
 
 ```bash
 # List the files in the present directory
@@ -116,19 +118,19 @@ You can verify this by browsing the link.
 ===============================================================================
 Welcome to localhost.run!
 
-Follow your favourite reverse tunnel at [https://twitter.com/localhost_run].
+Follow your favorite reverse tunnel at [https://twitter.com/localhost_run].
 ...
 dbf7d61ace7a14.lhr.life tunneled with tls termination, https://dbf7d61ace7a24.lhr.life
 ```
 
 My public link is **https://dbf7d61ace7a24.lhr.life**.
-I can view my html site by visiting **https://dbf7d61ace7a24.lhr.life/link-preview.html**.
+I can view my HTML site by visiting **https://dbf7d61ace7a24.lhr.life/link-preview.html**.
 
-Let's feed this url to [opengrapth.xyz](https://www.opengraph.xyz/).
+Let's feed this URL to [opengrapth.xyz](https://www.opengraph.xyz/).
 
 <BlogImageWithContext src={OpenGrapgDebugging} aspectRatio="16/9" width="768" alt="Preview of opengrapth.xyz" />
 
-The right hand side shows you the preview on `Facebook`, `Twitter`, `Linkedin` and `Discord`.
+The right-hand side shows you the preview on `Facebook`, `Twitter`, `Linkedin` and `Discord`.
 
 <BlogImageWithContext src={OpenGrapgDebuggingPreview} alt="Zoomed out preview of opengraph.xyz">
   This looks great. The image looks perfect. The provided title and description
@@ -137,7 +139,7 @@ The right hand side shows you the preview on `Facebook`, `Twitter`, `Linkedin` a
 
 ## Make it dynamic
 
-To add title to the image you'll need to create a server to generate the image with the title.
+To add a title to the image you'll need to create a server to generate the image with the title.
 There are many great libraries to do so. 
 The one I'm using right now is a small modification of [Lance Ross](https://lanceross.xyz/) next.js implementation. 
 But as we used `python` for hosting our main page, so let's stick to it. 
@@ -145,14 +147,14 @@ But as we used `python` for hosting our main page, so let's stick to it.
 The idea is simple. 
 We want to create a server that will look for a `GET` request with the title as a parameter. 
 In the backend, we want to download this image, resize it to the recommended size and then add our title to it. 
-After we are done with the modificatons, we'll sent the image as response. 
+After we are done with the modifications, we'll send the image as a response. 
 
 We will use `Flask` as the server. 
-`Pillow` module will help us modify the image. 
-And to download the initial image we were using, we will use `get` method of the good old module called `requests`.
+The `Pillow` module will help us modify the image. 
+And to download the initial image we were using, we will use the `get` method of the good old module called `requests`.
 
 #### `requirements.txt`
-```text
+```
 Flask
 pillow
 requests
@@ -204,15 +206,45 @@ if __name__ == '__main__':
 
 You can run the server using `python app.py`. By default, it uses port `5000`. 
 
-> You can serve your html content from this server. But for simplicity, let's keep them as separate entity. 
+> You can serve your HTML content from this server. But for simplicity, let's keep them as separate entities. 
 
 Let's test if it's working by visiting `localhost:5000/og_image?title=My first Link Preview`
 
 <BlogImage src={FlaskAppPreviewImage} alt="Flask app preview image" />
 
 Seems like visiting "`localhost:5000/og_image?title=My first Link Preview`" is generating the image along with the title as expected.
-Now let's expose this to public temprorarily using `localhost.run`. This time we will expose the port`5000`.
+Now let's expose this to the public temporarily using `localhost.run`. This time we will expose the port`5000`.
 
 ```bash
-ssh -R 80:localhost:5000 nokey@localhost.run
+> ssh -R 80:localhost:5000 nokey@localhost.run
+...
+ccfa74e0bbe1c1.lhr.life tunneled with tls termination, https://ccfa74e0bbe1c1.lhr.life
 ```
+
+> Reverse proxy may fail with the default server. So it is advisable to run the server using [Gunicorn](https://gunicorn.org/). 
+
+Let's add this to our simple HTML website.
+
+```html
+<head>
+    ...
+    <meta
+      property="og:image"
+      content="https://ccfa74e0bbe1c1.lhr.life/og_image?title=My%20first%20link%20preview"
+    />
+    ...
+    <meta
+      property="twitter:image"
+      content="https://ccfa74e0bbe1c1.lhr.life/og_image?title=My%20first%20link%20preview"
+    />
+</head>
+````
+
+> Previewing it on [opengraph.xyz](https://opengraph.xyz) may not work as we are on a dev server and CORS is not defined. But this should work on the apps. 
+
+<BlogImageWithContext src={SlackPreview} alt="slack preview" width="300">
+    <div>Posting it on slack works perfectly. It should work the same for other social midia apps.</div> 
+    <div>We can improve our testing by hosting the server on a hosting platform like [Vercel](https://vercel.com/).</div>
+</BlogImageWithContext>
+
+## Hosting the image server on [Vercel](https://vercel.com/)
