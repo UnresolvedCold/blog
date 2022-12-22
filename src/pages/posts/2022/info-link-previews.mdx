@@ -3,20 +3,21 @@ title: A note on creating dynamic link previews for your website or blog
 description: This is a little blog post on how to dynamically add a preview of your website while posting on social media
 pubDate: 2022-12-19T01:43:22+0530
 draft: false
-keywords: link-preview, open graph, twitter, facebook, twitter cards, telegram, whatsapp, link sharing, ngrok, localhost.run, python, python3, port forwarding, reverse tunneling, opengraph.xyz, localhost, hosting, templating. templating og
+keywords: link-preview, open graph, twitter, facebook, twitter cards, telegram, whatsapp, link sharing, ngrok, localhost.run, python, python3, port forwarding, reverse tunneling, opengraph.xyz, localhost, hosting, templating. templating og, python, pillow, python3, localhost.run, port forwarding
 ---
 
 import BlogImageWithContext from "@components/BlogImageWithContext.astro";
 import LinkPreviewDemo from "@images/posts/2022/info-link-previews/link-preview-demo.png";
 import OpenGrapgDebugging from "@images/posts/2022/info-link-previews/opengraph-debugging.png";
 import OpenGrapgDebuggingPreview from "@images/posts/2022/info-link-previews/opengraph-debugging-preview.png";
+import FlaskAppPreviewImage from "@images/posts/2022/info-link-previews/flask-app-preview-image.png";
 
 ## General Introduction
 
 Using social networking apps, you can add a preview to the URL you share.
 As a result, the reader can get a decent notion of the contents.
 
-<BlogImageWithContext src={LinkPreviewDemo} aspectRatio="1" width="200">
+<BlogImageWithContext src={LinkPreviewDemo} aspectRatio="1" width="200" alt="Preview of telegram">
   <div>
     The link shared on Dec 18 shows a preview consisting of a title and
     description.
@@ -125,13 +126,93 @@ I can view my html site by visiting **https://dbf7d61ace7a24.lhr.life/link-previ
 
 Let's feed this url to [opengrapth.xyz](https://www.opengraph.xyz/).
 
-<BlogImageWithContext src={OpenGrapgDebugging} aspectRatio="16/9" width="768" />
+<BlogImageWithContext src={OpenGrapgDebugging} aspectRatio="16/9" width="768" alt="Preview of opengrapth.xyz" />
 
 The right hand side shows you the preview on `Facebook`, `Twitter`, `Linkedin` and `Discord`.
 
-<BlogImageWithContext src={OpenGrapgDebuggingPreview}>
+<BlogImageWithContext src={OpenGrapgDebuggingPreview} alt="Zoomed out preview of opengraph.xyz">
   This looks great. The image looks perfect. The provided title and description
   are also shown as expected.
 </BlogImageWithContext>
 
 ## Make it dynamic
+
+To add title to the image you'll need to create a server to generate the image with the title.
+There are many great libraries to do so. 
+The one I'm using right now is a small modification of [Lance Ross](https://lanceross.xyz/) next.js implementation. 
+But as we used `python` for hosting our main page, so let's stick to it. 
+
+The idea is simple. 
+We want to create a server that will look for a `GET` request with the title as a parameter. 
+In the backend, we want to download this image, resize it to the recommended size and then add our title to it. 
+After we are done with the modificatons, we'll sent the image as response. 
+
+We will use `Flask` as the server. 
+`Pillow` module will help us modify the image. 
+And to download the initial image we were using, we will use `get` method of the good old module called `requests`.
+
+#### `requirements.txt`
+```text
+Flask
+pillow
+requests
+```
+
+Let's expose `/og_image` for getting the image. 
+
+#### `app.py`
+```python
+from flask import Flask, send_file, request
+from PIL import Image, ImageDraw, ImageFont
+import requests
+from io import BytesIO
+
+app = Flask(__name__)
+
+@app.route('/og_image')
+def og_image():
+    title = request.args.get('title')
+
+    # This is the recommended size as per opengraph.xyz
+    width = 1200
+    height = 630
+
+    # Let's get our image 
+    response = requests.get('https://live.staticflickr.com/7504/16258492451_3a097a932a_k.jpg')
+    image = Image.open(BytesIO(response.content))   
+    image.thumbnail((width, height))      # This is how you resize an image
+
+    # Draw the title on the image
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype('arial.ttf', 64)  # Font of the title
+
+    # Calculate the x and y positions to center the text
+    x = (width - draw.textsize(title, font=font)[0]) // 2
+    y = (height - draw.textsize(title, font=font)[1]) // 2
+
+    draw.text((x, y), title, font=font, fill=(255, 255, 0))
+
+    # Save the image to a temporary file
+    image.save('og_image.jpg')
+
+    # Return the image
+    return send_file('og_image.jpg', mimetype='image/jpeg')
+
+if __name__ == '__main__':
+    app.run(debug=True, host='localhost', port=5000)
+```
+
+You can run the server using `python app.py`. By default, it uses port `5000`. 
+
+> You can serve your html content from this server. But for simplicity, let's keep them as separate entity. 
+
+Let's test if it's working by visiting `localhost:5000/og_image?title=My first Link Preview`
+
+<BlogImage src={FlaskAppPreviewImage} alt="Flask app preview image" />
+
+Seems like visiting "`localhost:5000/og_image?title=My first Link Preview`" is generating the image along with the title as expected.
+Now let's expose this to public temprorarily using `localhost.run`. This time we will expose the port`5000`.
+
+```bash
+ssh -R 80:localhost:5000 nokey@localhost.run
+```
