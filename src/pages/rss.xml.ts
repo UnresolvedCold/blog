@@ -7,13 +7,17 @@ posts = posts.filter((post) => {
 })
 
 export const get = () => rss({
-  title: 'shubham.codes blog',
+  title: 'shubham.codes',
   description: 'subscribe and get notified',
   site: import.meta.env.SITE,
   items: posts.map((post) => ({
     link: post.url,
     title: post.frontmatter.title,
     pubDate: post.frontmatter.pubDate
-  })),
+  })).sort(
+    (a, b) =>
+      new Date(b.pubDate).valueOf() -
+      new Date(a.pubDate).valueOf()
+  ),
   stylesheet: '/style.xsl',
 });
