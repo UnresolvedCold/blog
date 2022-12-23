@@ -13,6 +13,17 @@ import OpenGrapgDebugging from "@images/posts/2022/info-link-previews/opengraph-
 import OpenGrapgDebuggingPreview from "@images/posts/2022/info-link-previews/opengraph-debugging-preview.png";
 import FlaskAppPreviewImage from "@images/posts/2022/info-link-previews/flask-app-preview-image.png";
 import SlackPreview from "@images/posts/2022/info-link-previews/link-preview-on-slack.png";
+import FinalPreview from "@images/posts/2022/info-link-previews/final-preview.png";
+
+## Index
+| Topic | Description |
+|---|---|
+| [General Introduction](#general-intoduction) | Understanding link previews |
+| [Defining meta tags](#defining-meta-tags) | Open-graph and Twitter mea tags | 
+| [Viewing and Debuggig](#viewing-and-debuggig)| Using opengraph.xyz to view your previews |
+| [Make it dynamic](#make-it-dynamic) | Create a custom server to generate images |
+| [Hosting the server on Heroku](#hosting-the-server-on-heroku)| Deploy the server on Heroku and test its working |
+| [Conclusion](#conclusion) | Final words |
 
 ## General Introduction
 
@@ -86,7 +97,7 @@ I want to show the title of the preview as "My first link preview".
 We will use the image hosted by [IG](https://flic.kr/ps/jAWKs) as [Cool JavaScript Code at Game Jam](https://flic.kr/p/qLH2nn) under [Creative Commons License](https://creativecommons.org/licenses/by/2.0/).
 Later on, we will dynamically display the title on this image.
 
-## Viewing & Debuggig
+## Viewing and Debuggig
 
 You can use [opengraph.xyz](https://www.opengraph.xyz/) to view your previews.
 Some of the previews I saw on `opengraph.xyz` weren't exactly like what I saw on social media sites.
@@ -151,7 +162,7 @@ After we are done with the modifications, we'll send the image as a response.
 
 We will use `Flask` as the server. 
 The `Pillow` module will help us modify the image. 
-And to download the initial image we were using, we will use the `get` method of the good old module called `requests`.
+And to download the initial image we were using, we will use the `get` method from the good old module called `requests`.
 
 #### `requirements.txt`
 ```
@@ -206,8 +217,6 @@ if __name__ == '__main__':
 
 You can run the server using `python app.py`. By default, it uses port `5000`. 
 
-> You can serve your HTML content from this server. But for simplicity, let's keep them as separate entities. 
-
 Let's test if it's working by visiting `localhost:5000/og_image?title=My first Link Preview`
 
 <BlogImage src={FlaskAppPreviewImage} alt="Flask app preview image" />
@@ -223,28 +232,120 @@ ccfa74e0bbe1c1.lhr.life tunneled with tls termination, https://ccfa74e0bbe1c1.lh
 
 > Reverse proxy may fail with the default server. So it is advisable to run the server using [Gunicorn](https://gunicorn.org/). 
 
-Let's add this to our simple HTML website.
+Instead of opening a directory server, let's serve our home page directlt from `flask`.
+For this, we'll need to copy the HTML file we created earlier to the templates directory.
+
+Below is what your directory structure will look like.
+```bash
+.
+│── templates
+│     └── link-preview.html 
+└── app.py
+```
+
+Modify `app.py` to serve our contents at the default route.
+
+```python
+app = Flask(__name__)
+...
+
+# This will be our default route that will serve the home page (we want to generate a preview for this page)
+@app.route('/')
+def home():
+    return render_template('link-preview.html')   # Note: link-preview.html is inside templates directory
+
+@app.route('/og_image')
+...
+```
+
+Also, modify the contents of `link-preview.html` to use our image generator server.
 
 ```html
 <head>
     ...
     <meta
       property="og:image"
-      content="https://ccfa74e0bbe1c1.lhr.life/og_image?title=My%20first%20link%20preview"
+      content="/og_image?title=My%20first%20link%20preview"
     />
     ...
     <meta
       property="twitter:image"
-      content="https://ccfa74e0bbe1c1.lhr.life/og_image?title=My%20first%20link%20preview"
+      content="/og_image?title=My%20first%20link%20preview"
     />
 </head>
 ````
 
-> Previewing it on [opengraph.xyz](https://opengraph.xyz) may not work as we are on a dev server and CORS is not defined. But this should work on the apps. 
+> Telegram and Slack are generating the link previews. I don't know the reason but previewing it on [opengraph.xyz](https://opengraph.xyz) was not working for me. Maybe because of a reverse proxy. To test this, I'll deploy the server on Heroku. 
 
 <BlogImageWithContext src={SlackPreview} alt="slack preview" width="300">
-    <div>Posting it on slack works perfectly. It should work the same for other social midia apps.</div> 
-    <div>We can improve our testing by hosting the server on a hosting platform like [Vercel](https://vercel.com/).</div>
+    <div>Posting it on slack works perfectly. It should work the same for other social media apps.</div> 
+    <div>But let's also test it on a hosting platform like [Vercel](https://vercel.com/) or [Heroku](https://dashboard.heroku.com/).</div>
 </BlogImageWithContext>
 
-## Hosting the image server on [Vercel](https://vercel.com/)
+## Hosting the server on [Heroku](https://dashboard.heroku.com/)
+
+The Flask `dev` server won't work with [Heroku](https://dashboard.heroku.com/) deployments. 
+Let's use [Gunicorn](https://gunicorn.org/) for our deployments. 
+
+Create a new file with the name `Procfile` with no extensions and modify its contents as below.
+
+#### `Procfile`
+```
+web: gunicorn gettingstarted.wsgi
+web: gunicorn app:app
+```
+
+The first line tells [Heroku](https://dashboard.heroku.com/) to use [Gunicorn](https://gunicorn.org/) as server.
+The second line tells[Gunicorn](https://gunicorn.org/) to run the app. 
+[Gunicorn](https://gunicorn.org/) uses the syntax `gunicorn filename:app_name` to start a server. 
+
+Also, update the `requirements.txt` file by adding `gunicorn`.
+
+####  `requirements.txt` 
+```
+Flask
+pillow
+requests
+gunicorn
+```
+
+Now you can use [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) to host the app following the below steps. 
+
+You can install the Heroku CLI using the instructions [here](https://devcenter.heroku.com/articles/heroku-cli).
+
+```bash
+# First you need git (Heroku uses git)
+> git init
+> git add .
+> git commit -m "My first link preview"
+
+# Login to your account
+> heroku Login
+
+# This will create an app and add a remote to your git
+> heroku create -a <some-unique-name>
+
+> git remote -v
+heroku https://git.heroku.com/<some-unique-name>.git
+
+# To deploy just push your code to Heroku remote
+> git push heroku main 
+```
+
+Let's check it on [opengraph.xyz](https://opengraph.xyz).
+
+<BlogImage src={FinalPreview} alt="opengraph.xyz preview"/>
+
+This is exactly what we wanted. 
+Now, we can create multiple HTML files with different titles and our server will generate a preview accordingly.
+
+This was a small demo of generating link previews. 
+You can further customize your server to generate previews based on title, description, publish date and much more. 
+
+## Conclusion
+
+A dynamic link preview can be generated by hosting a server and pointing our og/twitter image to it. 
+Here we used Flask to create a GET route that provides us with the image.
+You can add more flexibility/features by using `html2img` module for generating images from HTML directly.
+We also saw the process of hosting a Gunicorn server on Heroku. 
+This proved to be more useful in testing our deployment on [opengraph.xyz](https://opengraph.xyz) as reverse proxy had some problems.
