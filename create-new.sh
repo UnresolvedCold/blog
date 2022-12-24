@@ -3,7 +3,9 @@ name=$1
 year=$(date +'%Y')
 date=$(date +'%b %d, %Y')
 git fetch origin
-git checkout -b $name origin/publish
+git checkout publish
+git pull origin publish
+git checkout -b $name origin/$name
 mkdir -p src/pages/posts/$year/
 new_file="src/pages/posts/$year/$name.mdx"
 mkdir -p src/images/posts/$year/$name
