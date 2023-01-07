@@ -1,0 +1,82 @@
+---
+title: Automate your local environment setup using dev containers
+description: Now you don't need to waste any time helping a friend to contribute to your new project. Using dev containers, you can automate the process of setting up your local environment in seconds.  
+pubDate: Jan 07, 2023
+draft: false
+---
+import BlogImage from '@components/BlogImage.astro'
+
+## Problem 
+
+For some context, I use a dual-booted ROG with **Ubuntu 22.10** and **Windows 10** for development, along with a **MacBook Air 2020**.
+Every time I begin a new project that makes use of a new tech stack, I am required to take some time to set up the environment on all 3 machines.
+And my laziness compels me to use only one machine instead of setting up other ones. 
+The issue is that I don't want to go through the same setup process once again. 
+
+The same problem exists on a bigger scale too. 
+In GreyOrange, I've seen my supervisors spending a lot of time helping freshers set up their new laptops. 
+Even after following the setup guide on confluence, it took me a lot of time to build my first project successfully.
+Imagine helping 300 freshers set up their laptops for a particular project. 
+
+Plus, the building process can be different for different Operating Systems. 
+Wouldn't it be great to use a system that your CICD platform uses?
+
+These problems can be solved using **dev containers**. 
+
+## Dev containers
+
+Dev containers are just Docker containers that have all the tools and tech stacks ready to start development. 
+All you need to do is establish an ssh connection to your container and start coding. 
+And this configuration can be distributed using a version control system like `git`. 
+GitHub codespace uses dev container configurations to set up your cloud development environment. 
+You can also customize your dev container using a Docker file configuration. 
+
+## Dev container custom configurations
+
+A simple dev container configuration has a `.devcontainer` directory consisting of `devcontainer.json` and a `Dockerfile`.
+The `devcontainer.json` contains all the configurations used by the container while `Dockerfile` contains the instruction to create a Docker container. 
+
+#### `Directory structure`
+```bash
+.devcontainer
+├── Dockerfile
+└── devcontainer.json
+```
+
+#### `devcontainer.json`
+```json
+{
+	"name": "Hello DevContainer",   // This is the name of the container
+    
+    // build defines the image configurations
+    "build": {  
+        "dockerfile": "Dockerfile", // This is the Dockerfile located at '.devcontainer/Dockerfile'
+        "context": "..",            // This is where the project lies
+        "args": {                   // Anything supplied to Dockerfile as an argument
+            "SayHello": "Hello Frnd!!!" 
+        }
+    },
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+    // Container-specific settings like VSCode configurations
+    // "settings": {
+    // },
+
+	// Will run these after the container is created
+    // Generally used to install the dependencies
+	// "postCreateCommand": "pip install -r requirements.txt",
+
+    // You can use root as remoteUser but it's not advisable to do so
+	"remoteUser": "vscode"
+}
+
+````
+
+## Open your container in a browser
+
+## Conclusion
