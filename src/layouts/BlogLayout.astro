@@ -124,10 +124,15 @@ const canonicalURL = new URL(Astro.url).href;
         <article>
           <slot />
         </article>
-        <footer class="flex flex-row justify-between mt-16 text-lg">
+        <footer class="flex flex-col justify-between mt-16 text-lg">
           <a href="/posts" class="dark:text-blue-400 text-blue-600"
             >Back to posts</a
           >
+          <span>
+            <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+            {frontmatter.keywords!=null && <span class="w-2 italic text-zinc-400 dark:text-zinc-600 text-sm">Tags : </span>}
+            {frontmatter.keywords!=null && <span class="w-2 italic text-zinc-400 dark:text-zinc-600 text-sm">{frontmatter.keywords}</span>}
+          </span>
         </footer>
         <CommentSection
           theme="https://shubham.codes/css/CommentSection.css"
