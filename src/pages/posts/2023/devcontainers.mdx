@@ -1,8 +1,9 @@
 ---
 title: Automate your local environment setup using dev containers
 description: Now you don't need to waste any time helping a friend to contribute to your new project. Using dev containers, you can automate the process of setting up your local environment in seconds.  
-pubDate: Jan 07, 2023
+pubDate: 2023-01-08T19:06:49+0000
 draft: false
+keywords: devcontainers, docker containers, docker, docker-compose, Dockerfile, VSCode, github.dev, fish, zsh, oh-my-zsh, bash, powerlevel10k, sh, git, github cli, github, gh, codespace, cloud, development, Springboot, Postgresql, SQL, PostgreSQL, Maven, mvn, java, java8, jre, template, workspace, service, bullseye, debian, debian 11, version-control, source-control, .zshrc, .p10k.zsh, .p10k, git repo, GreyOrange, remotessh, ssh, Dev Container, rebuild, remote
 ---
 import BlogImage from '@components/BlogImage.astro'
 import BlogImageWithContext from '@components/BlogImageWithContext.astro'
@@ -11,6 +12,23 @@ import DevcontainerConnected from '@images/posts/2023/devcontainers/Devcontainer
 import GitSupport from '@images/posts/2023/devcontainers/git-support.png'
 import BrowserCode from '@images/posts/2023/devcontainers/BrowserCode.png'
 import RunningPostgresAndApp from '@images/posts/2023/devcontainers/RunningPostgresAndApp.png'
+import Powerlevel10k from '@images/posts/2023/devcontainers/powerlevel10k.png'
+import Fish from '@images/posts/2023/devcontainers/fish.png'
+
+## Index
+
+| Topic | Description |
+| -- | -- |
+| [Problem](#problem) | Automate the set up process for the projects |
+|[Dev Containers](#dev-containers)| What are dev containers? |
+|[Dev container custom configurations](#dev-container-custom-configurations)| Configuring a dev container as per your needs. |
+|[Open your container in VSCode](#open-your-container-in-vscode)| How to open a dev container in `VSCode`. |
+|[Open your container in a browser](#open-your-container-in-a-browser)| Opening dev container in `github.dev `text editor. |
+|[Creating a dev container using templates available](#creating-a-dev-container-using-templates-available)| `Java` and `Postgres` (as service) dev container set up. |
+|[Adding fish terminal to the dev container](#adding-fish-terminal-to-the-dev-container)| Using `fish` shell and setting the default shell for a container. |
+|[oh-my-zsh with powerlevel10k](#oh-my-zsh-with-powerlevel10k)| Using `zsh` along with `oh-my-zsh` and `powerlevel10k`. |
+|[Make the dev container distributable](#make-the-dev-container-distributable)| You should not add personal changes to source control. Use external script to modify the dev container configurations. |
+|[Conclusion](#conclusion)| Final words |
 
 ## Problem 
 
@@ -27,16 +45,16 @@ Imagine helping 300 freshers set up their laptops for a particular project.
 Plus, the building process can be different for different Operating Systems. 
 Wouldn't it be great to use a system that your CICD platform uses?
 
-These problems can be solved using **dev containers** that only require `Docker` and `git` installed on your machine. 
+This problem can be solved using **dev containers** that only require `Docker` and `git` installed on your machine. 
 
 ## Dev containers
 
-Dev containers are just Docker containers that have all the tools and tech stacks ready to start development. 
-All you need to do is establish a connection to your container and start coding. 
-And this configuration can be distributed using a version control system like `git`. 
-Thus anyone can run these Docker containers and start development on their machine. 
-GitHub codespace uses dev container configurations to set up your cloud development environment. 
-You can also customize your dev container using a Docker file configuration. 
+Dev containers are just Docker containers that are fully equipped with the necessary tech stacks and tools to begin developing. 
+Simply establish a connection with your container and begin writing code. 
+Additionally, a version control program like `git` may be used to share this setup.
+So, anyone with a computer may run these Docker containers and begin developing them. 
+GitHub codespace uses dev container configurations to set up their cloud development environment. 
+You can also customize your dev container using the `Dockerfile` and `docker-compose` configurations. 
 
 ## Dev container custom configurations
 
@@ -195,13 +213,13 @@ After a few moments, [VSCode](https://code.visualstudio.com/) will create a `.de
 
 Looking at the generated code it seems like we require some modifications for this to work properly.
 
-First, we want to initialize the databases as per the `./misc/database_creator.sql`. 
+1. We want to initialize the databases as per the `./misc/database_creator.sql`. 
 This file contains all the databases we require to run the test cases. 
-This can be done by adding an entry to the `db` -> `volume` as `../misc/database_creator.sql:/docker-entrypoint-initdb.d/database_creator.sql` in the `docker-compose.yml` file.
+This can be done by adding an entry to the `db` -> `volume` as '../misc/database_creator.sql:/docker-entrypoint-initdb.d/database_creator.sql' in the `docker-compose.yml` file.
 
-Second, the Java image should be `java:8-bullseye`, not `java:0-8-bullseye` which was generated by the generator. 
+2. The Java image should be `java:8-bullseye`, not `java:0-8-bullseye` which was generated by the generator. 
 
-Third, we need `Postgres:9.6`, the generated one point to the latest image.
+3. We need `Postgres:9.6`, the generated one point to the latest image.
 
 #### `devcontainer.json`
 ```json
@@ -287,6 +305,8 @@ You can also view this combination in Docker Desktop.
 
 <BlogImageWithContext src={RunningPostgresAndApp} alt="Postgres and Java App in Docker Desktop" width="768" aspectRatio="16/9"/>
 
+> Note: Here I haven't used `git` and `gh` features because the image `mcr.microsoft.com/devcontainers/java:8-bullseye` already comes with these tools. 
+
 Let's verify the `Java` and `Maven` versions.
 
 ```bash
@@ -314,6 +334,327 @@ Let's compile the project.
 [INFO] ------------------------------------------------------------------------
 ```
 
-It took a while but the build was successful.
+It took a while but the build was successful. 
+
+## Adding fish terminal to the dev container
+
+Right now, the dev container is using `bash` as it's the default shell. 
+There are a lot of shells that come along with this image. 
+
+```bash
+> echo $SHELL
+/bin/bash
+
+> cat /etc/shells
+/bin/sh
+/bin/bash
+/bin/rbash
+/bin/dash
+/bin/zsh
+/usr/bin/zsh
+```
+
+Let's try installing [fish](https://fishshell.com/) terminal which is not available by default.
+`fish` can be installed using the features option in `devcontainer.json`. 
+A list of features is available [here](https://containers.dev/features).
+
+Modify the `devcontainer.json` as shown below and rebuild the container.
+
+#### `devcontainer.json`
+```json
+{
+    ...
+    "features": {
+		"ghcr.io/meaningful-ooo/devcontainer-features/fish:1": {}
+	}
+}
+```
+
+Now, you can find `fish` in the list of available shells. And this feature also sets `fish` as your default terminal. 
+
+```bash
+> cat /etc/shells
+/bin/sh
+/bin/bash
+/bin/rbash
+/bin/dash
+/bin/zsh
+/usr/bin/zsh
+/usr/bin/fish   # This is it
+```
+
+<BlogImageWithContext src={Fish} alt="Fish terminal" width="768" aspectRatio="16/9"/>
+
+If you don't want to set `fish` as your default terminal, you can specify the default terminal in `devcontainer.json` file as follows.
+This will set `bash` as your default container. 
+
+#### `devcontainer.json`
+```json
+{
+  ...
+	"settings": { 
+		"terminal.integrated.defaultProfile.linux": "bash", 
+		"terminal.integrated.profiles.linux": { 
+			"bash": { 
+				"path": "bash" 
+				} 
+			} 
+		}
+  ...
+}
+```
+
+## oh-my-zsh with powerlevel10k
+
+`fish` is a great shell. 
+But I want the dev container to feel like my local machine that has `oh-my-zsh` with [powerlevel10k](https://github.com/romkatv/powerlevel10k). 
+At the time of writing this blog, I wasn't able to find any features to install these things.
+So I went with configuring the `Dockerfile` itself to include these features.
+
+> Disclaimer: This is a very bad idea to directly change a source controlled dev container file as per your preference
+
+This image already comes with [oh-my-zsh](https://ohmyz.sh/). [Powerlevel10k](https://github.com/romkatv/powerlevel10k) is a custom theme that I'll need to install on my own.
+Same goes for [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) and [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) plugins. 
+
+#### `Dockerfile`
+```docker
+...
+# Install powerlevel10k
+RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/vscode/.oh-my-zsh/custom/themes/powerlevel10k
+# Install zsh-autosuggestions
+RUN git clone https://github.com/zsh-users/zsh-autosuggestions /home/vscode/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+# Install zsh-syntax-highlighting
+RUN git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /home/vscode/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+# This is my local machine's theme file 
+COPY .p10k.zsh /home/vscode
+# This is the modified zsh configuration
+COPY .zshrc /home/vscode
+``` 
+
+`.p10k.zsh` contains the [powerlevel10k](https://github.com/romkatv/powerlevel10k) configurations. 
+`.zshrc` contains the `zsh` configurations.
+These files are located inside the home directory. 
+I just copied them to `.devcontainer` for an easy transfer to the dev container. 
+
+```bash
+> tree -a .devcontainer
+.devcontainer
+├── .p10k.zsh
+├── .zshrc
+├── Dockerfile
+├── devcontainer.json
+└── docker-compose.yml
+```
+
+> If you don't have the `.p10k.zsh`, you can skip the COPY step while building the container. Once inside the container, you can run `p10k configure` to generate the `.p10k.zsh` file. Then the contents of this file can be copied to `.devcontainer/.p10k.zsh` for future builds. 
+
+Below is my `.zshrc` file. You can verify the `ZSH_THEME` is set as `powerlevel10k/powerlevel10k`.
+I am just using 3 plugins. The `git` plugin is available by default. `zsh-autosuggestions` and `zsh-syntax-highlighting` were downloaded from GitHub. 
+
+```bash
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+export ZSH="$HOME/.oh-my-zsh"
+
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+plugins=(
+	git
+	zsh-autosuggestions
+	zsh-syntax-highlighting
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+```
+
+<BlogImageWithContext src={Powerlevel10k} alt="oh-my-zsh with powerlevel10k terminal" width="768" aspectRatio="16/9"/>
+
+> If there are multiple developers with their shell preference, modification of `Dockerfile` for a specific need is not a very good idea. 
+
+## Make the dev container distributable
+
+You should not change a source controlled `Dockerfile` to satisfy your need. 
+The current `Dockerfile` contains the changes I made to suit my preference. 
+I like `zsh` so I did some customization to Docker to support my theming style.
+If I commit these changes to the remote, this might become a problem for another developer who prefers some other shell or theme.
+Plus, if everyone starts making changes to the dev container configuration, this might result in merge conflicts. 
+
+In scenarios like this, you can use the git `skip-worktree` feature. 
+After cloning the base repo, you don't want to make any commits on the dev container. 
+So you can tell git to ignore tracking the `.devcontainer` directory.
+
+```bash
+# Tell git to stop tracking these files
+> git update-index --assume-unchanged .devcontainer/*
+
+# View the files which are not being tracked
+> git ls-files -v | grep "h" | grep dev
+h .devcontainer/Dockerfile
+h .devcontainer/devcontainer.json
+h .devcontainer/docker-compose.yml
+```
+
+Now you can freely configure the dev container as per your need. 
+
+> Actually, this is not the best way to deal with this problem at all, as this will ignore the `.devcontainer` directory even in the case of `git pull`. 
+And if you do the reverse using `git update-index --no-assume-unchanged .devcontainer/*`, you will need to commit or discard your changes before proceeding. 
+
+The best way I can think of to deal with this problem is by keeping the personal installations away from the git repository.
+
+For this, let's create an external script that will install `powerlevel10k` and other plugins using the `docker` commands. 
+
+First, let's move our `.zshrc` and `.p10k.zsh` to a new directory out of our repository.
+I'm creating a hidden directory in the `home` directory for this. 
+
+```bash
+> mkdir ~/.personal-devcontainer 
+> mv .devcontainer/.zshrc ~/.personal-devcontainer
+> mv .devcontainer/.p10k.zsh ~/.personal-devcontainer
+```
+
+Also, let's reset the `devcontainer.json`, `Dockerfile` and `docker-compose.yml` to the unbiased version.
+
+#### `devcontainer.json`
+```json
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/java-postgres
+{
+	"name": "Java & PostgreSQL",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
+}
+```
+
+#### `Dockerfile`
+```docker
+# Changed java:0-8-bullseye to java:8-bullseye
+FROM mcr.microsoft.com/devcontainers/java:8-bullseye
+
+ARG INSTALL_MAVEN="true"
+ARG MAVEN_VERSION=""
+
+ARG INSTALL_GRADLE="false"
+ARG GRADLE_VERSION=""
+
+RUN if [ "${INSTALL_MAVEN}" = "true" ]; then su vscode -c "umask 0002 && . /usr/local/sdkman/bin/sdkman-init.sh && sdk install maven \"${MAVEN_VERSION}\""; fi \
+    && if [ "${INSTALL_GRADLE}" = "true" ]; then su vscode -c "umask 0002 && . /usr/local/sdkman/bin/sdkman-init.sh && sdk install gradle \"${GRADLE_VERSION}\""; fi
+
+```
+
+#### `docker-compose.yml`
+```yaml
+version: '3.8'
+
+volumes:
+  postgres-data:
+
+services:
+  app:
+    container_name: javadev
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in db container
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_DB: postgres
+        # We will populate the database using database_creator.sql
+        # POSTGRES_HOSTNAME: postgresdb 
+
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    network_mode: service:db
+
+    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally. 
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+  db:
+    container_name: postgresdb
+    image: postgres:9.6
+    restart: always
+    volumes:
+      # Run the below script as an initialization script 
+      - ../misc/database_creator.sql:/docker-entrypoint-initdb.d/database_creator.sql
+      # We no longer require this
+      # - postgres-data:/var/lib/postgresql/data
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in app container
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      # We will create our databases using misc/database_creator.sql
+      # POSTGRES_DB: postgres
+
+    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+```
+
+Now, let's create a bash script inside `~/.personal-devcontainer` that will change the container configuration as per our preference (personal changes).
+
+```bash
+> cd ~/.personal-devcontainer
+> touch install.sh
+> chmod +x install.sh
+> vim install.sh
+```
+
+#### `install.sh`
+```bash
+# This will work on a running dev container
+CONTAINER_NAME=$1
+docker exec $CONTAINER_NAME git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/vscode/.oh-my-zsh/custom/themes/powerlevel10k
+docker exec $CONTAINER_NAME git clone https://github.com/zsh-users/zsh-autosuggestions /home/vscode/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+docker exec $CONTAINER_NAME git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /home/vscode/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+docker cp ~/.personal-devcontainer/.p10k.zsh $CONTAINER_NAME:/home/vscode/.p10k.zsh
+docker cp ~/.personal-devcontainer/.zshrc $CONTAINER_NAME:/home/vscode/.zshrc
+docker exec $CONTAINER_NAME chsh -s $(which zsh)
+```
+
+Now you can just run `./install.sh javadev` to install the preferences to the javadev container (which is our development container name).
+As I'll keep changing the script depending on my projects, I'll publish the installation scripts repo to my [git repo](https://github.com/GO-Shubham-Kumar/personal-devcontainer.git). 
+
+There are 2 problems with this method -
+1. You will require to run the script on every rebuild.
+2. You cannot directly use this script online with `github.dev`. 
+
+For easier access, let's create an alias for the script. It will take a container name as a parameter and will configure the shell as required. 
+
+#### `.zshrc`
+```bash
+...
+# configure-personal-dev-container javadev
+function configure-personal-dev-container {
+	if [[ -z $1 ]]; then 
+		echo Please provide a container name
+		exit 1
+	else
+		~/.personal-devcontainer/install.sh $1
+	fi
+}
+...
+```
+
+Now, I can run `configure-personal-dev-container javadev` from anywhere. 
 
 ## Conclusion
+
+Dev container helps us to reduce the setup time for a project. 
+We started with creating a simple dev container configuration. 
+We used the power of dev containers to open the project in `VSCode` and `github.dev`.
+Then we created a complex dev container configuration consisting of `Java` & `Maven` with `PostgreSQL` installation and database creation for an ongoing project at [GreyOrange](https://www.greyorange.com/). 
+We tried to compile our project inside the dev container which worked as expected.
+Then we moved to configure the `shell` inside the dev container. 
+We tried `fish` and `zsh` with `powerlevel10k` which is what I use locally. 
+We also learned to configure the dev container for personal development without disturbing the source-controlled setup configurations. 
