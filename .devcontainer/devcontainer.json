@@ -29,8 +29,17 @@
 	"runArgs": ["--name", "Blog"],
 
 	// Configure tool-specific properties.
-	// "customizations": {},
-
+	"customizations": {
+		"vscode": {
+		  "extensions": [
+			"dbaeumer.vscode-eslint",
+			"donjayamanne.git-extension-pack",
+			"mhutchie.git-graph",
+			"github.vscode-pull-request-github",
+			"formulahendry.auto-close-tag",
+			"formulahendry.auto-rename-tag"
+		]}
+	  }
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	"remoteUser": "vscode"
 }
