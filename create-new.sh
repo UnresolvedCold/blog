@@ -5,7 +5,7 @@ date=$(date +'%b %d, %Y')
 git fetch origin
 git checkout publish
 git pull origin publish
-git checkout -b $name
+git checkout -b blog-$name
 mkdir -p src/pages/posts/$year/
 new_file="src/pages/posts/$year/$name.mdx"
 mkdir -p src/images/posts/$year/$name
