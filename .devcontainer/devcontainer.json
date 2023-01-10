@@ -2,15 +2,10 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
 	"name": "Blog",
-	"build": {  
-        "dockerfile": "Dockerfile", // This is the Dockerfile located at '.devcontainer/Dockerfile'
-        "context": "..",            // This is where the project lies
-        "args": {                   // Anything supplied to Dockerfile as an argument
-            "NODE_IMAGE": "node:16-bullseye-slim",
-			"USERNAME": "vscode",
-			"USER_UID": "1001"
-        }
-    },
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "blog",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
@@ -21,8 +16,7 @@
 	"forwardPorts": [3000],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm install",
-	"runArgs": ["--name", "Blog"],
+	"postCreateCommand": "npm ci",
 
 	// Configure tool-specific properties.
 	"customizations": {

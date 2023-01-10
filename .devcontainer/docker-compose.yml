@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  blog:
+    container_name: blog
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_IMAGE: node:16-bullseye-slim
+        USERNAME: vscode
+        USER_UID: 1001
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
