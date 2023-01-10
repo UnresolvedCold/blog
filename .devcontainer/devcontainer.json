@@ -6,7 +6,7 @@
         "dockerfile": "Dockerfile", // This is the Dockerfile located at '.devcontainer/Dockerfile'
         "context": "..",            // This is where the project lies
         "args": {                   // Anything supplied to Dockerfile as an argument
-            "NODE_VERSION": "16-bullseye" ,
+            "NODE_IMAGE": "node:16-bullseye-slim",
 			"USERNAME": "vscode",
 			"USER_UID": "1001"
         }
@@ -14,11 +14,7 @@
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
-		"ghcr.io/devcontainers/features/git:1": {},
-		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/dhoeric/features/google-cloud-cli:1": {
-			"version": "latest"
-		}
+		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -39,7 +35,7 @@
 			"formulahendry.auto-close-tag",
 			"formulahendry.auto-rename-tag"
 		]}
-	  }
+	  },
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	"remoteUser": "vscode"
 }
