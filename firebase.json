@@ -8,6 +8,13 @@
           "key" : "Access-Control-Allow-Origin",
           "value" : "*"
         } ]
-      }]
+      }],
+      "redirects": [
+        {
+          "source": "/code",
+          "destination": "https://google.com",
+          "type": 301
+        }
+      ]
     }
   }
