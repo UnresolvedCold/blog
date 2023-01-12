@@ -62,6 +62,9 @@ jobs:
     - name: Update pubDate
       run: |
         # Add pubDate after ideaDate to blog
+        pwd
+        ls -a
+        exit 3
         for file in ${{ needs.get-new-blogs.outputs.raw-new-blogs }}; do
           sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" $file
         done
