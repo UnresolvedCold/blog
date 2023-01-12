@@ -98,21 +98,21 @@ jobs:
           args: deploy --only hosting
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-  publish-social:
-    needs: [get-new-blogs, deploy]
-    runs-on: ubuntu-latest 
-    if: needs.get-new-blogs.outputs.new-blogs != '[]'
-    strategy: 
-      matrix: 
-        blog: ${{ fromJson(needs.get-new-blogs.outputs.new-blogs) }}
-    steps:
-      - name: Notify on Telegram
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            Checkout my new blog post !!!
+  # publish-social:
+  #   needs: [get-new-blogs, deploy]
+  #   runs-on: ubuntu-latest 
+  #   if: needs.get-new-blogs.outputs.new-blogs != '[]'
+  #   strategy: 
+  #     matrix: 
+  #       blog: ${{ fromJson(needs.get-new-blogs.outputs.new-blogs) }}
+  #   steps:
+  #     - name: Notify on Telegram
+  #       uses: appleboy/telegram-action@master
+  #       with:
+  #         to: ${{ secrets.TELEGRAM_TO }}
+  #         token: ${{ secrets.TELEGRAM_TOKEN }}
+  #         message: |
+  #           Checkout my new blog post !!!
 
-            ${{ matrix.blog }}
+  #           ${{ matrix.blog }}
             
