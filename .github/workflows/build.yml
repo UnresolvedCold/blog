@@ -76,7 +76,9 @@ jobs:
         done
         git status
     - name: Commit changes to publish branch
-      if: inputs.deploy_site
+      if: |
+        inputs.deploy_site ||
+        contains(github.event.head_commit.message, '[force-deploy]')"
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Processed Publish [skip ci]
@@ -95,7 +97,9 @@ jobs:
     name: Deploy
     needs: build 
     runs-on: ubuntu-latest
-    if: inputs.deploy_site
+    if: | 
+      inputs.deploy_site || 
+      contains(github.event.head_commit.message, '[force-deploy]')"
     steps:
       - uses: actions/checkout@v3
       - name: Download Dist
