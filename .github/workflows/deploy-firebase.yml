@@ -66,18 +66,12 @@ jobs:
         with:
           name: dist
           path: dist
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
-        with:
-          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.I_AM_EMAIL }}
       - name: Depoy to Firebase
         uses: w9jds/firebase-action@master
         with:
           args: deploy --only hosting
-        # env:
-        #   FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
   publish-social:
     needs: [get-new-blogs, deploy]
     runs-on: ubuntu-latest 
