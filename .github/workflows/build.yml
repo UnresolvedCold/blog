@@ -1,11 +1,13 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Firebase CI
+name: Build
 
 on:
-  push:
-    branches: [ "publish" ]
+  workflow_call:
+    inputs:
+      deploy_site:
+        required: false
+        type: boolean
+        default: false
+        description: Will deploy the site to firebase if true
 
 jobs:
   evaluate-changes: 
@@ -75,13 +77,12 @@ jobs:
     - name: Update pubDate
       run: |
         # Add pubDate after ideaDate to blog
-        pwd
-        ls -a ./src/pages/posts/2023
         for file in ${{ needs.evaluate-changes.outputs.raw-new-blogs }}; do
           sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" ./$file
         done
         git status
     - name: Commit changes to publish branch
+      if: inputs.deploy_site
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Processed Publish [skip ci]
@@ -98,6 +99,7 @@ jobs:
     name: Deploy
     needs: build 
     runs-on: ubuntu-latest
+    if: inputs.deploy_site
     steps:
       - uses: actions/checkout@v3
       - name: Download Dist
@@ -128,4 +130,4 @@ jobs:
             Checkout my new blog post !!!
 
             ${{ matrix.blog }}
-            
+                    
