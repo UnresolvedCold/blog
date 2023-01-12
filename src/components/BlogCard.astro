@@ -5,11 +5,12 @@ export interface Props {
   title: string;
   description: string;
   pubDate: string;
+  ideaDate: string;
   url: string | undefined;
   minutesRead: string;
 }
-let { title, description, pubDate, url, minutesRead } = Astro.props;
-const shortDate = new Date(pubDate).toLocaleDateString("en", {
+let { title, description, pubDate, ideaDate, url, minutesRead } = Astro.props;
+const shortDate = new Date(pubDate==undefined?ideaDate:pubDate).toLocaleDateString("en", {
   dateStyle: "medium",
 });
 url = url + "/";

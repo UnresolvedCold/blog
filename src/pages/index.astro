@@ -7,6 +7,7 @@ import { Picture } from "@astrojs/image/components";
 interface Frontmatter {
   title: string;
   pubDate: string;
+  ideaDate: string
   description: string;
   draft: boolean;
 }
@@ -15,9 +16,15 @@ let blogs = await Astro.glob<Frontmatter>("./posts/**/*.mdx");
 // blogs = blogs.filter((post) => !post.frontmatter.draft);
 blogs = blogs.sort(
   (a, b) =>
-    new Date(b.frontmatter.pubDate).valueOf() -
-    new Date(a.frontmatter.pubDate).valueOf()
-);
+  new Date(
+    b.frontmatter.pubDate==undefined?
+      b.frontmatter.ideaDate:
+      b.frontmatter.pubDate).valueOf() - 
+  new Date(
+    a.frontmatter.pubDate==undefined?
+      a.frontmatter.ideaDate:
+      a.frontmatter.pubDate).valueOf()
+  );
 ---
 
 <Layout title="Shubham's corner on the internet" description="This is where Shubham shares his amazing contents on Math, Electronocs and Computers.">
@@ -63,6 +70,7 @@ blogs = blogs.sort(
                 title={post.frontmatter.title}
                 description={post.frontmatter.description}
                 pubDate={post.frontmatter.pubDate}
+                ideaDate={post.frontmatter.ideaDate}
                 url={post.url}
                 minutesRead={post.frontmatter.minutesRead}
               />

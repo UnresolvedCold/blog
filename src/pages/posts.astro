@@ -5,13 +5,23 @@ import BlogCard from "@components/BlogCard.astro";
 interface Frontmatter {
   title: string;
   pubDate: string;
+  ideaDate: string;
   description: string;
   draft: boolean
 }
 
 let blogs = await Astro.glob<Frontmatter>("./posts/**/*.mdx");
 // blogs = blogs.filter((post) => !post.frontmatter.draft);
-blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf());
+blogs = blogs.sort((a, b) => 
+  new Date(
+    b.frontmatter.pubDate==undefined?
+      b.frontmatter.ideaDate:
+      b.frontmatter.pubDate).valueOf() - 
+  new Date(
+    a.frontmatter.pubDate==undefined?
+      a.frontmatter.ideaDate:
+      a.frontmatter.pubDate).valueOf()
+  );
 ---
 
 <Layout title="Posts" description="Blog Posts">
@@ -23,7 +33,14 @@ blogs = blogs.sort((a, b) => new Date(b.frontmatter.pubDate).valueOf() - new Dat
   </section>
   <section>
     <ul class="flex flex-col justify-center py-5">
-      {blogs.map((post) => <BlogCard title={post.frontmatter.title} description={post.frontmatter.description} pubDate={post.frontmatter.pubDate} url={post.url} minutesRead={post.frontmatter.minutesRead}/>)}
+      {blogs.map((post) => 
+        <BlogCard title={post.frontmatter.title} 
+                  description={post.frontmatter.description} 
+                  pubDate={post.frontmatter.pubDate} 
+                  ideaDate={post.frontmatter.ideaDate} 
+                  url={post.url} 
+                  minutesRead={post.frontmatter.minutesRead}/>
+      )}
     </ul>
   </section>
 </Layout>
