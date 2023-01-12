@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NODE_IMAGE: node:16-bullseye-slim
+        NODE_IMAGE: amd64/node:16-bullseye-slim
         USERNAME: vscode
         USER_UID: 1001
     volumes:
