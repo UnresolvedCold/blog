@@ -67,12 +67,6 @@ jobs:
       with:
         node-version: 16
         cache: 'npm'
-    - name: Cache builds
-      id: cache-builds
-      uses: actions/cache@v3
-      with:
-        path: dist
-        key: ${{ runner.os }}-dist
     - run: npm ci
     - name: Update pubDate
       run: |
@@ -89,7 +83,9 @@ jobs:
         branch: publish
         file_pattern: 'src/pages/posts/**/*.mdx'
         commit_user_name: Publish Bot
-    - run: npm run build --if-present
+    - run: |
+        rm -rf dist
+        npm run build --if-present
     - name: Archive Dist
       uses: actions/upload-artifact@v3
       with:
