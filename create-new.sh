@@ -19,4 +19,5 @@ echo "ideaDate: $date" >> $new_file
 echo "---" >> $new_file
 
 # Result
-echo "Starter file generated"
+echo "Starter file generated!"
+echo "Happy Blogging"
