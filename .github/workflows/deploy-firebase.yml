@@ -71,7 +71,7 @@ jobs:
     - name: Commit changes to publish branch
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_message: Processed Publish
+        commit_message: Processed Publish [skip ci]
         branch: publish
         file_pattern: 'src/pages/posts/**/*.mdx'
         commit_user_name: Publish Bot
