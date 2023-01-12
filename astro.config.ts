@@ -19,19 +19,25 @@ export default defineConfig({
     extendDefaultPlugins: true
   },
   base: "/",
-  integrations: [compress({
+  integrations: [
+  tailwind(), 
+  sitemap(), 
+  mdx({
+    remarkPlugins: [[astroLayouts, {
+      default: "@layouts/Layout.astro",
+      posts: "@layouts/BlogLayout.astro"
+    }]]
+  }), 
+  image({
+    serviceEntryPoint: '@astrojs/image/sharp'
+  }), 
+  react(),
+  compress({
     css: true,
     html: true,
     js: true,
     img: true,
     svg: true,
     logger: 0
-  }), tailwind(), sitemap(), mdx({
-    remarkPlugins: [[astroLayouts, {
-      default: "@layouts/Layout.astro",
-      posts: "@layouts/BlogLayout.astro"
-    }]]
-  }), image({
-    serviceEntryPoint: '@astrojs/image/sharp'
-  }), react()]
+  })]
 });
