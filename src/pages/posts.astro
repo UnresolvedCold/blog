@@ -11,7 +11,7 @@ interface Frontmatter {
 }
 
 let blogs = await Astro.glob<Frontmatter>("./posts/**/*.mdx");
-// blogs = blogs.filter((post) => !post.frontmatter.draft);
+blogs = blogs.filter((post) => !post.frontmatter.draft);
 blogs = blogs.sort((a, b) => 
   new Date(
     b.frontmatter.pubDate==undefined?

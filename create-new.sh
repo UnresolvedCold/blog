@@ -14,7 +14,6 @@ echo "import BlogImage from '@components/BlogImage.astro'" >> $new_file
 echo "---" > $new_file
 echo "title: Some Name" >> $new_file
 echo "description: Some Description" >> $new_file
-echo "draft: true" >> $new_file
 echo "ideaDate: $date" >> $new_file
 echo "---" >> $new_file
 
