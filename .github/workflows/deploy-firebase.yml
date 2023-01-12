@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
+      raw-new-blogs: ${{ steps.new-blogs.outputs.rawnewblogs }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,12 +27,19 @@ jobs:
         id: new-blogs
         run: |
           newblogs=()
+          rawnewblogs=()
           for file in ${{ steps.changed-files.outputs.added_files }}; do
-            newblogs+=(https://shubham.codes${file:9:-4})
+            isDraft=$(grep -E '^---$' -A 1000 $file | sed '/^---$/d' | awk '/draft:/ {print $2}')
+            echo isDraft: $isDraft
+            if [[ "$isDraft" != "true"]]; then
+              newblogs+=($file)
+              newblogs+=(https://shubham.codes${file:9:-4})
+            fi
           done
           newblogs=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${newblogs[@]}")
           echo "newblogs=${newblogs}"
           echo "newblogs=${newblogs}" >> $GITHUB_OUTPUT
+          echo "rawnewblogs=${newblogs}" >> $GITHUB_OUTPUT
   build:
     runs-on: ubuntu-latest
     needs: get-new-blogs
@@ -49,6 +57,20 @@ jobs:
         path: dist
         key: ${{ runner.os }}-dist
     - run: npm ci
+    - name: Update pubDate
+      run: |
+        # Add pubDate after ideaDate to blog
+        for file in ${{ needs.get-new-blogs.outputs.raw-new-blogs }}; do
+          sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" $file
+        done
+        git status
+    - name: Commit changes to publish branch
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Processed Publish
+        branch: publish
+        file_pattern: 'src/pages/posts/**/*.mdx'
+        commit_user_name: Publish Bot
     - run: npm run build --if-present
     - name: Archive Dist
       uses: actions/upload-artifact@v3
