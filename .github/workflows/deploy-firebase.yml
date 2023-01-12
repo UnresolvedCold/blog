@@ -63,10 +63,10 @@ jobs:
       run: |
         # Add pubDate after ideaDate to blog
         pwd
-        ls -a
+        ls -a ./src/pages/posts/2023
         exit 3
         for file in ${{ needs.get-new-blogs.outputs.raw-new-blogs }}; do
-          sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" $file
+          sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" ./$file
         done
         git status
     - name: Commit changes to publish branch
