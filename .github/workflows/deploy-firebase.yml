@@ -32,8 +32,8 @@ jobs:
             isDraft=$(grep -E '^---$' -A 1000 $file | sed '/^---$/d' | awk '/draft:/ {print $2}')
             echo isDraft: $isDraft
             if [[ "$isDraft" != "true" ]]; then
-              newblogs+=($file)
-              rawnewblogs+=(https://shubham.codes${file:9:-4})
+              rawnewblogs+=($file)
+              newblogs+=(https://shubham.codes${file:9:-4})
             fi
           done
           newblogs=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${newblogs[@]}")
