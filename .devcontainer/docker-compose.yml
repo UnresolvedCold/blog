@@ -9,6 +9,7 @@ services:
         NODE_IMAGE: amd64/node:16-bullseye-slim
         USERNAME: vscode
         USER_UID: 1001
+        WAKATIME_API: ${WAKATIME_API}
     volumes:
       - ../..:/workspaces:cached
     command: sleep infinity

@@ -5,6 +5,7 @@ FROM ${NODE_IMAGE}
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
+ARG WAKATIME_API=waka
 
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
@@ -36,3 +37,6 @@ RUN git clone https://github.com/zsh-users/zsh-autosuggestions /home/vscode/.oh-
 RUN git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /home/vscode/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 COPY .zshrc /home/vscode/
 COPY .p10k.zsh /home/vscode/
+
+# Setup Wakatime 
+RUN echo [settings] > ~/.wakatime.cfg; echo api_key = $WAKATIME_API >> ~/.wakatime.cfg
