@@ -24,6 +24,7 @@
     "tailwindcss": "^3.2.4"
   },
   "dependencies": {
+    "@akebifiky/remark-simple-plantuml": "^1.0.2",
     "@astrojs/react": "^1.2.2",
     "@giscus/react": "^2.2.4",
     "@types/react": "^18.0.26",
