@@ -1,0 +1,30 @@
+---
+let { context } = Astro.props;
+
+/*
+How to use this?
+
+<PlantUML context="First, a client requests that the server connects to it. Following a specific secret exchanged between them, a hidden consistent tunnel is established.">
+    ```plantuml alt=Websocket Protocol, width=90%
+        node Server
+        actor Client
+
+        Server <-right- "Client" : request
+
+    ```
+    ... Multiple plantuml codes are allowed
+</PlantUML>
+*/
+
+---
+
+<div class="flex flex-col sm:flex-row justify-center items-center">
+    <div class="basis-1/2">
+        <slot />
+    </div>
+    {context.length > 0 && 
+    <div class="basis-1/2 sm:p-5">
+        <p class="text-justify align-middle">{context}</p>
+    </div>}
+</div>
+

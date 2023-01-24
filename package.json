@@ -24,7 +24,6 @@
     "tailwindcss": "^3.2.4"
   },
   "dependencies": {
-    "@akebifiky/remark-simple-plantuml": "^1.0.2",
     "@astrojs/react": "^1.2.2",
     "@giscus/react": "^2.2.4",
     "@types/react": "^18.0.26",
@@ -32,6 +31,7 @@
     "mdast-util-to-string": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "reading-time": "^1.5.0"
+    "reading-time": "^1.5.0",
+    "@unresolvedcold/remark-simple-plantuml": "git+https://github.com/UnresolvedCold/remark-simple-plantuml.git#master"
   }
 }
