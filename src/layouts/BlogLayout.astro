@@ -4,7 +4,7 @@ import Header from "@components/Header.astro";
 import { Icon } from "astro-icon";
 import CommentSection from "@components/CommentSection.jsx";
 
-let { pubDate } = Astro.props.content;
+let { pubDate, ideaDate } = Astro.props.content;
 const { frontmatter } = Astro.props;
 export interface Props {
   title?: string;
@@ -14,10 +14,10 @@ export interface Props {
   keywords: string;
 }
 
-const thisDate = new Date(pubDate).toLocaleDateString("en", {
+const thisDate = new Date(pubDate==undefined?ideaDate:pubDate).toLocaleDateString("en", {
   dateStyle: "long",
 });
-pubDate = pubDate.split("T")[0];
+pubDate = (pubDate == undefined ? ideaDate.split("T")[0] : pubDate.split("T")[0]);
 
 const ogImageParams = new URLSearchParams({
   title: JSON.stringify(frontmatter.title),
@@ -121,7 +121,7 @@ const canonicalURL = new URL(Astro.url).href;
             </span>
           </nav>
         </header>
-        <article class="break-words">
+        <article class="break-words text-justify">
           <slot />
         </article>
         <footer class="flex flex-col justify-between mt-16 text-lg">

@@ -31,6 +31,7 @@
     "mdast-util-to-string": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "reading-time": "^1.5.0"
+    "reading-time": "^1.5.0",
+    "@unresolvedcold/remark-simple-plantuml": "git+https://github.com/UnresolvedCold/remark-simple-plantuml.git#master"
   }
 }

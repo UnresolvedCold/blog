@@ -7,6 +7,7 @@ import image from "@astrojs/image";
 import astroLayouts from "astro-layouts";
 import { remarkReadingTime } from './src/library/remark/remark-reading-time.mjs';
 import react from "@astrojs/react";
+import remarkSimplePlantumlPlugin from "@unresolvedcold/remark-simple-plantuml"
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,7 +16,7 @@ export default defineConfig({
     shikiConfig: {
       theme: "dracula"
     },
-    remarkPlugins: [remarkReadingTime],
+    remarkPlugins: [remarkReadingTime, remarkSimplePlantumlPlugin],
     extendDefaultPlugins: true
   },
   base: "/",
