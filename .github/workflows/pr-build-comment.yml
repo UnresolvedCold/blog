@@ -1,0 +1,129 @@
+name: Run a test server
+
+on:
+  issue_comment:
+    types: [ created ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  reply-ack:
+    name: Reply with Run URL
+    runs-on: ubuntu-latest
+    outputs:
+      duration: ${{ steps.params.outputs.duration }}
+      pr_branch: ${{ steps.params.outputs.pr_branch }}
+    if: contains(github.event.comment.body, ':run-server:')
+    steps:
+    - uses: actions/checkout@v3
+    - name: Get Parameters
+      id: params
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        body="${{ github.event.comment.body }}"
+        body=`echo $body | sed 's/ *$//g'| tr -d '\n' | tr -d '\r'`
+        duration=300
+        if [[ $body == *"duration="* ]]; then
+          duration="${body#*duration=}"
+          duration="${duration% *}"
+        fi
+        echo duration=$duration
+        echo duration=$duration >> $GITHUB_OUTPUT
+        branch=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq '.headRefName')
+        echo pr_branch=$branch >> $GITHUB_OUTPUT
+        echo pr_branch: $branch
+        
+    - name: Update comment on building
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.issue.number }}
+        comment-id: ${{ github.event.comment.id }}
+        reactions: eyes
+        body: |
+          :zap: Building the site (would be live for ${{ steps.params.outputs.duration }}s)
+          :rocket: Check the runner at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  build:
+    needs: reply-ack
+    name: Build site
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      deploy_site: false
+      force_build: true
+      branch: ${{ needs.reply-ack.outputs.pr_no }}
+
+  run_server:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    needs: [reply-ack, build]
+    steps:
+    - name: Download Dist
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+    - name: Start Server
+      run: |
+        cd dist
+        python -m http.server &
+        echo "Server started on port 8000"
+        cd ..
+    - name: Ngrok Tunnel Action
+      run: |
+        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+        unzip -qq ngrok-stable-linux-amd64.zip
+        ls -a
+        ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+        ./ngrok http 8000 &
+    - name: Get Tunnel Output
+      id: tunnel
+      shell: bash
+      run: |
+        url=$( curl http://127.0.0.1:4040/api/tunnels | jq -r ".tunnels[0].public_url" )
+        echo "tunnel-url: $url" 
+        echo "tunnel-url=$url" >> $GITHUB_OUTPUT
+        TZ='Asia/Kolkata'
+        duration=${{ needs.reply-ack.outputs.duration }}
+        echo duration: $duration
+        echo tunnel-timeout=$(TZ=Asia/Kolkata date -d "+$duration seconds") >> $GITHUB_OUTPUT
+    - name: Update comment with url
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.issue.number }}
+        comment-id: ${{ github.event.comment.id }}
+        reactions: rocket
+        body: |
+          :white_check_mark: You can test your site at: ${{ steps.tunnel.outputs.tunnel-url }}
+          :signal_strength: The tunnel will close by ${{ steps.tunnel.outputs.tunnel-timeout }}
+    - name: Close Server
+      run: |
+        sleep ${{ needs.reply-ack.outputs.duration }}
+        echo "tunnel closed"
+    - name: Update comment on tunnel closure
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.issue.number }}
+        comment-id: ${{ github.event.comment.id }}
+        body: |
+          :ghost: Tunnel Closed
+    - name: Failure
+      if: failure()
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.issue.number }}
+        comment-id: ${{ github.event.comment.id }}
+        reactions: confused
+        body: |
+          :x: Something Went Wrong

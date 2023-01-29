@@ -19,6 +19,9 @@
       ],
       "@library/*": [
         "src/library/*"
+      ],
+      "@scripts/*": [
+        "src/scripts/*"
       ]
     },
     "jsx": "react-jsx",

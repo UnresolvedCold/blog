@@ -62,19 +62,8 @@ const canonicalURL = new URL(Astro.url).href;
       }
       document.documentElement.className = theme;
     </script>
-    <script defer>
-      const themeBtn = document.querySelector(".theme-toggle");
-      const htmlClassList = document.documentElement.classList;
-      themeBtn.addEventListener("click", function () {
-        if (htmlClassList.contains("dark")) {
-          localStorage.setItem("theme", "light");
-          htmlClassList.remove("dark");
-        } else {
-          localStorage.setItem("theme", "dark");
-          htmlClassList.add("dark");
-        }
-      });
-    </script>
+    <script src="@scripts/main.js"></script>
+
   </head>
   <body
     class="font-inter text-xl dark:bg-zinc-900 dark:text-white transition-colors motion-reduce:transition-none selection:bg-sky-600/60 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-300 dark:scrollbar-thumb-zinc-600 dark:scrollbar-track-zinc-800"
