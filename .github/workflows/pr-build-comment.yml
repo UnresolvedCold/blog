@@ -53,7 +53,7 @@ jobs:
     with:
       deploy_site: false
       force_build: true
-      branch: ${{ needs.reply-ack.outputs.pr_no }}
+      branch: ${{ needs.reply-ack.outputs.pr_branch }}
 
   run_server:
     runs-on: ubuntu-latest
