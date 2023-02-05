@@ -53,25 +53,39 @@ const icons = [
                   target="_blank"
                   rel="noopener nofollow"
                   aria-label="github logo"
-                  class="hidden sm:block text-black dark:text-zinc-400 hover:text-zinc-500 dark:hover:text-white transition-colors motion-reduce:transition-none text-xl"
+                  class="group hidden sm:block text-black dark:text-zinc-400 hover:text-zinc-500 dark:hover:text-white transition-colors motion-reduce:transition-none text-xl"
                 >
                   <Icon
                     name={desktop_ico.icon}
-                    class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none"
+                    class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none sm:group-hover:animate-spin"
                   />
                 </a>
               </li>
             ))
           }
           <li>
-            <button class="theme-toggle pointer" aria-label="theme toggle">
+            <a
+                  href="/aboutme"
+                  target="_blank"
+                  rel="noopener nofollow"
+                  aria-label="github logo"
+                  class="group flex flex-row text-black dark:text-zinc-400 hover:text-zinc-500 dark:hover:text-white transition-colors motion-reduce:transition-none text-xl"
+                >
+              <Icon
+                name="ph:brackets-square"
+                class="w-7 text-black dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none sm:group-hover:animate-spin"
+              />
+            </a>
+          </li>
+          <li>
+            <button class="group theme-toggle pointer" aria-label="theme toggle">
               <Icon
                 name="charm:moon"
-                class="w-7 hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none dark:hidden"
+                class="w-7 hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none dark:hidden sm:group-hover:animate-spin"
               />
               <Icon
                 name="akar-icons:sun"
-                class="w-7 dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none hidden dark:block"
+                class="w-7 dark:text-white hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors motion-reduce:transition-none hidden dark:block sm:group-hover:animate-spin"
               />
             </button>
           </li>
