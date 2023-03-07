@@ -1,0 +1,120 @@
+---
+title: Understanding Spring Boot Embedded Camunda Engine 
+description: Here, I'm going to explore the Camunda engine by embedding it into a Spring Boot application (using Java 8 and Maven).  
+ideaDate: Mar 05, 2023
+---
+import BlogImage from '@components/BlogImage.astro'
+import CamundaInitilizerPNG from '@images/posts/2023/embedded-camunda-bpms-app/camunda-initilizer.png'
+import CamundaModelerPNG from '@images/posts/2023/embedded-camunda-bpms-app/camunda-modeler.png'
+import CamundaTaskListPNG from '@images/posts/2023/embedded-camunda-bpms-app/camunda-task-list.png'
+import CamundaProcess1PNG from '@images/posts/2023/embedded-camunda-bpms-app/camunda-process-1.png'
+import CamundaProcess2PNG from '@images/posts/2023/embedded-camunda-bpms-app/camunda-process-2.png'
+import CamundaProcess3PNG from '@images/posts/2023/embedded-camunda-bpms-app/camunda-process-3.png'
+
+## Introduction
+
+## Initializing the project
+
+You can create a new Spring Boot app with all the Camunda dependencies by visiting the [Camunda Initializer](https://start.camunda.com/) website.
+This is similar to [Spring Boot Initializer](https://start.spring.io/). 
+You can configure the Group, Artifact and Java Version for the project.
+Click on `Generate Project` to download your maven project as a zip file which you can extract and start working.
+
+<BlogImage src={CamundaInitilizerPNG} alt="" />
+
+Below is how your project is structured. 
+The `pom.xml` file defined your maven project.
+The `Application.java` file is responsible to run your Spring Boot app.
+The configuration for the Camunda engine is defined in `application.yaml` file 
+and the process is defined in `process.bpmn` file. 
+
+```bash
+> tree .
+.
+|-- pom.xml
+`-- src
+    `-- main
+        |-- java
+        |   `-- codes
+        |       `-- shubham
+        |           `-- Application.java
+        `-- resources
+            |-- application.yaml
+            `-- process.bpmn
+```
+
+The `process.bpmn` file is `XML` file that represents the BPMN diagram of the process
+which can be viewed and edited using the Camunda modeler. 
+
+> You can install the Camunda modeler by visiting [Camunda downloads site](https://camunda.com/download/modeler/) or by using brew on mac.
+
+## Camunda Modeler and BPMN Diagrams
+
+Below is how the process will look like on opening the Camunda modeler.
+
+<BlogImage src={CamundaModelerPNG} alt="" />
+
+The "Say hello to admin" process is a user process. 
+You can identify this by looking at the icon on the process block. 
+Here, it's of a person meaning this process will wait for someone's approval. 
+If there is a gear icon on it, then it means the process will wait for a code to get completed.
+
+> You can change the component type by clicking on the component and then clicking the settings icon hovering next to it. 
+ Camunda supports nearly all the BPMN2.0 diagrams. A list can be found [here](https://docs.camunda.io/docs/components/modeler/bpmn/bpmn-coverage/).
+
+To test the workflow, you can visit the `tasklist` pannel on the Camunda server and click `start process` on the top left.
+You'll see all the processes here.
+For now, click on `camunda-learning-process`. 
+The business key is not mandatory, you can just click start. 
+This task can be viewed in your filters.
+
+> If by default you don't have any filter, just create a new filter by clicking on the create filter button on the tasklist page.
+
+<BlogImage src={CamundaTaskListPNG} alt="" aspectRatio={2/1}/>
+
+But you cannot click on the complete button. 
+This is because the task is not assigned to you.
+You can assign the task to anyone by visiting the cockpit and clicking on the process.
+The number on the component describes the number of pending tasks.
+You can click on the `Process Instance ID` to jump to a particular task.
+
+<BlogImage src={CamundaProcess1PNG} alt="" aspectRatio={16/9}/>
+
+Go to the `user tasks` tab and click on the assignee edit button.
+Let's assign admin as the assignee. 
+
+<BlogImage src={CamundaProcess2PNG} alt="" aspectRatio={16/9}/>
+
+Now you can go back to the `tasklist` and click on the complete button signifying you approve the task.
+
+<BlogImage src={CamundaProcess3PNG} alt="" aspectRatio={16/9}/>
+
+## Extending the Camunda engine
+
+Above we explored the Camunda server instance and the Camunda modeler.
+Here, let's try to extend the original Camunda engine with some features.
+
+### Configuring the engine properties
+
+The configuration file for the engine is called `application.yaml` located inside the resources directory.
+You can configure many different properties like the user id and password or maybe the port and route for the engine.
+A huge list of all the Camunda engine parameters can be found [here](https://docs.camunda.org/manual/latest/user-guide/spring-boot-integration/configuration/#camunda-engine-properties).
+Apart from that, you can also use [Spring Boot parameters](https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) for configuring the server. 
+
+For now, let's configure the port to be `8096`, route to `camunda-engine` and a default filter for 'All Tasks'.
+The port and route are Spring Boot properties while filter is related to Camunda.
+
+```yaml
+server:
+    port: 8096
+    servlet:
+    contextPath: /camunda-engine
+
+camunda:
+    bpm:
+        filter:
+            create: All tasks
+
+```
+
+Compiling the app and running it will run the engine at port `8096` and you can verify this by visiting [localhost:8096/camunda-engine](http://localhost:8096/camunda-engine).
