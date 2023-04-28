@@ -1,0 +1,99 @@
+---
+title: Package Java JNI libraries in a JAR using Maven
+description: This article shows how to package JNI libraries in a JAR using Maven.
+ideaDate: Apr 29, 2023
+keywords: java, maven, jni, jar, native, library, package, load, system, utils, native-utils, jitpack, github, dll, so, dylib
+---
+
+## Introduction
+
+If you are using a native library in a Java program, you'll need to load the library using the `System.loadLibrary` method.
+But if you are packaging your Java program as a JAR file, the native library will not be available to the `System.loadLibrary` method.
+In this article, we'll see the correct way to package the native library in the JAR file using Maven so that it will be accessible in our Java program without any other user intervention.
+
+## Project Structure
+
+Maven follows a specific project structure where all the source code is placed in `src/main/java` and all the resources are placed in `src/main/resources`. 
+The resources directory is added to the classpath when the project is compiled and packaged.
+This means you can access the contents of the `resources` directory directly in the Java program by specifying the path relative to the resources directory.
+
+Let's say you have a native library `libhello.dylib` in the `resources/lib` directory.
+After packaging this will be available at the path `lib/libhello.dylib` in the JAR file.
+
+## Use Native Utils instead of System.loadLibrary
+
+The default way to load a native library in Java is to use the `System.loadLibrary` method.
+The `maven package` command will generate the jar file of the project. 
+The native library will be placed in the `lib` directory inside the jar file which will not be available to the `System.loadLibrary` method.
+
+One way is to extract this library and then load it using the `System.loadLibrary` method. But this is not what we want.
+We can leverage the use of [Native Utils](https://github.com/adamheinrich/native-utils).
+Internally this utility is extracting the native library from the jar file to a temporary directory and loads the library from there.
+This will keep our hands out of the dirty work of extracting the library and loading it.
+It provides a method `loadLibraryFromJar` which can be used to load the native library from the jar file.
+
+## Modify the POM file to use Native Utils
+
+As [Native Utils](https://github.com/adamheinrich/native-utils) is not available as a release package, we'll need to add it directly from the GitHub repository.
+For this, we can use the [JitPack](https://jitpack.io/) service which allows us to add GitHub repositories as Maven dependencies.
+For this, you'll need to add [JitPack](https://jitpack.io/) as a repository in you `POM.XML` file.
+
+```xml
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+```
+
+Also, you'll require to add the dependency for [Native Utils](https://github.com/adamheinrich/native-utils).
+For this, we need to give `groupId` as `com.github.<user-name>` and `artifactId` as `<repository-name>`.
+Since we are using the latest commit from the repository, we'll need to specify the commit hash in the version tag.
+Below is how the dependency will look like in `POM.XML`.
+
+```xml
+  <dependency>
+    <groupId>com.github.adamheinrich</groupId>
+    <artifactId>native-utils</artifactId>
+    <version>e6a39489662846a77504634b6fafa4995ede3b1d</version>
+  </dependency>
+```
+
+Now, you can confirm the dependency is added by running the `maven dependency:tree` command.
+
+```bash
+> mvn dependency:tree
+
+[INFO] --- maven-dependency-plugin:2.8:tree (default-cli) @ javaunsafe ---
+[INFO] com.gor.poc:javaunsafe:jar:1.0-SNAPSHOT
+[INFO] +- log4j:log4j:jar:1.2.17:compile
+[INFO] +- junit:junit:jar:3.8.1:test
+[INFO] \- com.github.adamheinrich:native-utils:jar:e6a39489662846a77504634b6fafa4995ede3b1d:compile
+```
+
+You can see, my project is using 3 dependencies, log4j, junit, and native-utils with their version as specified.
+
+## Load the native library
+
+In your Java file you can call the `loadLibraryFromJar` method to load the native library.
+
+```Java
+import cz.adamh.utils.NativeUtils;
+
+public class NativeMemoryLoader {
+
+  static {
+    try {
+      NativeUtils.loadLibraryFromJar("/lib/libhello.dylib");
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  public static native void sayHello();
+
+  ...
+}
+```
