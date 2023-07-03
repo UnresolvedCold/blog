@@ -1,0 +1,114 @@
+---
+title: My Astro NeoVim setup
+description: This blog intents to maintain my latest NeoVim setup and configuration guide. 
+ideaDate: Jun 30, 2023
+---
+
+## What is NVim and AstroVim? 
+
+`NVim` is a terminal based editor made to enhance Vim by adding a wide range of features and configurations.
+
+`AstroVim` is a set of pre-configured plugins that gives you a headstart by providing an initial setup
+consisting most of the generally used plugins such as `Tree-sitter`.
+
+There are many other standard configurations such as [NvChad](https://github.com/NvChad/NvChad) 
+and [LunarVim](https://www.lunarvim.org/) that you can look into.
+And ofcourse, you can also start writing your config files from scratch. 
+
+## Prerequisites
+
+1. You will need NVim version greater than `0.8.5`
+1. Get yourself familiar with `Lua` scripting language as all the config files use this 
+
+## Installation steps
+
+Before doing anything else, make a backup of your current configuration.
+
+```
+# Backup of config files
+mv ~/.config/nvim ~/.config/nvim.bak
+
+# Backup of shared folder
+mv ~/.local/share/nvim ~/.local/share/nvim.bak
+```
+
+Now, install `AstroVim`. This is just cloning the [AstroVim](https://github.com/AstroNvim/AstroNvim) repository to your config directory.
+
+Next, create your personal config repository by using the template provided [here](https://github.com/AstroNvim/user_example).
+Clone this repository at `~/config/nvim/lua/user` directory.
+This is where you will add your own customizations.
+
+```
+git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim
+
+# Cloning my config repository
+git clone --depth 1 https://github.com/UnresolvedCold/astro-nvim-configurations ~/.config/nvim/lua/user
+
+
+# Launch NVim
+nvim 
+```
+
+The first launch of `nvim` will load the plugin manager. 
+This will install all the required plugins. 
+
+You can quit this screen by entering `q`. 
+
+## Key bindings
+
+### Useful Vim key bindings 
+
+Vim works in different modes.
+
+1. Normal mode (Esc) - This is the default mode where you can navigate through a file 
+2. Insert mode (i, o, A, O, ...) - This mode enables you to edit the file
+3. Terminal Mode (:) - You can enter commands in terminal mode
+4. Visual mode (v, ctrl + V) - For manipulating multiple lines
+
+Here are some of the useful key bindings that are generally used by me (will keep updating).
+
+| Function | Mode | Key | How to remember? |
+| --- | --- | ---| --- |
+| Move to the end of the line | Normal | $ | This symbol is used for end in regex |
+| Move to the beginning of the line | Normal | ^ | This symbol is used for beggining in regex |
+| Insert mode at the end of the line | Normal | A | Appednd | 
+| Insert mode at the beginning of the line | Normal | I | Insert |
+| Insert mode after the cursor | Normal | a | insert after as A was for line |
+| Insert mode before the cursor | Normal | i | insert before as I was for line |
+| Undo | Normal | u | undo |
+| Yank (~Copy) | Normal | yy | yank yank |
+| Delete line (~Cut) | Normal | dd | delete delete |
+| Put (~Paste)| Normal | p, P | paste |
+| View Vim build in tutorial | Terminal | :Tutor | |
+
+The delete command works the same as cut in general. 
+`p` pastes the content in the next line while `P` pastes the content in the previous line.
+
+During the inital days of Vim, it's recommended that you go through the tutorial frequently and don't try to memorize all the key bindings all at once.
+
+### AstroNVim key bindings
+
+There is a leader key (by default `<spc>`) that triggers the key cmd mode. 
+If you'll press `<spc>`, it will display all the other key bindings that you can use.
+
+| Function | Key | 
+| --- | --- |
+| Quit Vim | <spc> q |
+| Quit the current buffer | <spc> c |
+| Toggle Explorer | <spc> o |
+| Save a file | <spc> w | 
+| Comment a line | <spc> / |
+| Git related  | <spc> g |
+| Find | <spc> f |
+| Todos | <spc> T |
+| Terminal | <spc> T f |
+| Close Terminal | <F7> |
+| Next anything | <spc> ] |
+| Next buffer | <spc> ] b |
+| Previous buffer | <spc> [ b |
+
+## Other Plugins that I use with Vim 
+
+
+
+
