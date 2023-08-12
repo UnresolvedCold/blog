@@ -18,4 +18,4 @@ jobs:
     secrets: inherit
     with:
       deploy_site: false
-      branch: ${{ github.ref }} 
+      branch: ${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
