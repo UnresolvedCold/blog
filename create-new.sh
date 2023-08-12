@@ -14,6 +14,7 @@ echo "---" > $new_file
 echo "title: $name" >> $new_file
 echo "description: $name" >> $new_file
 echo "ideaDate: $date" >> $new_file
+echo "draft: true" >> $new_file
 echo "heroImage: /hero-images/default.png" >> $new_file
 echo "---" >> $new_file
 
