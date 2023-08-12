@@ -36,7 +36,7 @@ jobs:
           git branch   
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v34
+        uses: tj-actions/changed-files@v37
         with:
           files: |
             src/content/blog/**.mdx
