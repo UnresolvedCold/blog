@@ -1,0 +1,27 @@
+---
+import SideBarFooter from "./SideBarFooter.astro";
+import { Image } from "@astrojs/image/components";
+import SideBarMenu from "./SideBarMenu.astro";
+const { sideBarActiveItemID } = Astro.props;
+---
+
+<div class="drawer-side z-40">
+  <label for="my-drawer" class="drawer-overlay"></label>
+  <aside class="px-2 pt-2 h-auto min-h-full w-[19rem] bg-base-200 text-base-content flex flex-col">
+    <div class="w-fit mx-auto mt-5 mb-6">
+      <a href="/">
+        <div class="avatar transition ease-in-out hover:scale-[102%] block m-auto">
+          <div class="w-[15rem]">
+            <Image class="mask mask-circle" aspectRatio="1:1" format="webp" width={500} height={500} src="/profile.png" alt="Profile image" />
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="w-[2.5rem] mx-auto my-auto py-auto flex flex-row items-center justify-center">
+      <img src="/favicon.svg" alt="Logo" />
+      <span><a class="ml-2 whitespace-nowrap" href="/">Shubham Kumar</a></span>
+    </div>
+    <SideBarMenu sideBarActiveItemID={sideBarActiveItemID} />
+    <SideBarFooter />
+  </aside>
+</div>

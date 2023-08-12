@@ -36,10 +36,10 @@ jobs:
           git branch   
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v34
+        uses: tj-actions/changed-files@v37
         with:
           files: |
-            src/pages/posts/**/*.mdx
+            src/content/blog/**.mdx
       - name: Track deployable files
         id: enable-deploy
         uses: tj-actions/changed-files@v34
@@ -73,12 +73,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: evaluate-changes
-    if: needs.evaluate-changes.outputs.enable-deploy == 'true' || inputs.force_build
+    if: (needs.evaluate-changes.outputs.enable-deploy == 'true' || inputs.force_build) && always()
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - run: |
+    - name: Checkout input branch  - ${{ inputs.branch }}
+      if: inputs.branch
+      run: |
         git checkout ${{ inputs.branch }} 
         git branch 
     - name: Use Node.js 16

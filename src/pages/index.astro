@@ -1,88 +1,47 @@
 ---
-import Layout from "@layouts/Layout.astro";
-import BlogCard from "@components/BlogCard.astro";
-import Subscribe from "@components/Subscribe.astro";
-import { Picture } from "@astrojs/image/components";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HorizontalCard from "../components/HorizontalCard.astro";
+import { getCollection } from "astro:content";
 
-interface Frontmatter {
-  title: string;
-  pubDate: string;
-  ideaDate: string
-  description: string;
-  draft: boolean;
-}
+const posts = (await getCollection("blog")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-let blogs = await Astro.glob<Frontmatter>("./posts/**/*.mdx");
-blogs = blogs.filter((post) => !post.frontmatter.draft);
-blogs = blogs.sort(
-  (a, b) =>
-  new Date(
-    b.frontmatter.pubDate==undefined?
-      b.frontmatter.ideaDate:
-      b.frontmatter.pubDate).valueOf() - 
-  new Date(
-    a.frontmatter.pubDate==undefined?
-      a.frontmatter.ideaDate:
-      a.frontmatter.pubDate).valueOf()
-  );
+const last_posts = posts.slice(0, 3);
 ---
 
-<Layout title="Shubham's corner on the internet" description="This is where Shubham shares his amazing contents on Math, Electronocs and Computers.">
-  <section class="flex flex-col sm:flex-row justify-evenly items-center py-14">
-    <Picture
-      src="/profile.png"
-      class="basis-1/2 rounded-full overflow-hidden inline-flex sm:m-5"
-      alt="Shubham"
-      aspectRatio="1:1"
-      widths={[240]}
-      loading="eager"
-      sizes="160px"
-      width={240}
-      height={240}
-    />
+<BaseLayout sideBarActiveItemID="home">
+  <div class="pb-12 mt-5">
+    <div class="text-xl py-1">Hi 👋,</div>
+    <div class="text-5xl font-bold">I'm Shubham</div>
+    <div class="text-3xl py-3 font-bold">Engineer - Software Development</div>
+    <div class="py-2">
+      <text class="text-lg">
+        <div>Currently, working with <a href="https://www.greyorange.com/" target="_blank">GreyOrange</a>, helping Product Architects in the initial development of the product and POCs. 
+          This is the corner on internet where I share my interesting works and learnings. 
+        </div>
 
-    <header class="basis-1/2 max-w-xl sm:order-first text-justify">
-      <h1 class="text-3xl mb-10 md:mb-5 mt-10 sm:mt-0 text-center sm:text-left">
-        Hi, I am Shubham.
-      </h1>
-      <p class="text-black dark:text-zinc-300 mb-5">
-        Right now, I'm working with GreyOrange as a software development
-        engineer.
-      </p>
-      <p class="text-black dark:text-zinc-300">
-        Being a major in math and electronics, I am fascinated with computers
-        and everything revolving around them.
-      </p>
-      <p class="text-black dark:text-zinc-300">
-        Here, I write about some of my interesting works and important findings.
-      </p>
-    </header>
-  </section>
-  <section class="py-14">
-    <h1 class="text-3xl mb-5 text-center sm:text-left">Recent Posts</h1>
-    <ul class="flex flex-col justify-center py-5">
-      {
-        blogs.length >= 1 &&
-          blogs
-            .slice(0, 3)
-            .map((post) => (
-              <BlogCard
-                title={post.frontmatter.title}
-                description={post.frontmatter.description}
-                pubDate={post.frontmatter.pubDate}
-                ideaDate={post.frontmatter.ideaDate}
-                url={post.url}
-                minutesRead={post.frontmatter.minutesRead}
-              />
-            ))
-      }
-    </ul>
-    <div class="text-center dark:text-zinc-300 text-zinc-200 mt-5">
-      <a
-        href="/posts"
-        class="p-3 rounded-lg dark:bg-zinc-800 bg-zinc-200 dark:text-zinc-300 text-black p-4 ring-2 ring-opacity-0 ring-zinc-500 focus:ring-opacity-100 transition-all motion-reduce:transition-none"
-        >Show more posts</a
-      >
+      </text>
     </div>
-  </section>
-</Layout>
+  </div>
+
+  {
+    last_posts.map((post) => (
+      <>
+        <HorizontalCard
+          title={post.data.title}
+          img={post.data.heroImage}
+          desc={post.data.description}
+          url={"/blog/" + post.slug}
+          target="_self"
+          badge={post.data.badge}
+        />
+        <div class="divider my-0" />
+      </>
+    ))
+  }
+
+<div class="mt-8 flex justify-center items-center">
+  <a href="/blog" class="btn btn-outline ml-5">
+    View More
+  </a>
+</div>
+</BaseLayout>

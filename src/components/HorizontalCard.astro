@@ -1,0 +1,76 @@
+---
+const { title, img, desc, url, badge, tags, target = "_blank" } = Astro.props;
+import { Image } from "@astrojs/image/components";
+
+function getAbstractColor(title: string) {
+  let sum = 0;
+  for (let i = 0; i < title.length; i++) {
+    sum += title.charCodeAt(i);
+  }
+
+  // Calculate RGB values based on the sum
+  const r = (sum * 13) % 256;
+  const g = (sum * 17) % 256;
+  const b = (sum * 19) % 256;
+
+  // Convert RGB values to hex
+  const hex_beg = `#${r.toString(16).padStart(2, "0")}${g
+    .toString(16)
+    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+
+  const r2 = (sum * 23) % 256;
+  const g2 = (sum * 37) % 256;
+  const b2 = (sum * 43) % 256;
+
+  const hex_end = `#${r2.toString(16).padStart(2, "0")}${g2
+    .toString(16)
+    .padStart(2, "0")}${b2.toString(16).padStart(2, "0")}`;
+
+  return `linear-gradient(45deg, ${hex_beg} 0%, ${hex_end} 100%)`;
+}
+---
+
+<div
+  class="rounded-lg bg-base-100 hover:shadow-xl transition ease-in-out hover:scale-[102%]"
+>
+  <a href={url} target={target}>
+    <div class="hero-content flex-col md:flex-row">
+      {
+        (img && (
+          <Image
+            src={img}
+            aspectRatio="16:9"
+            width={750}
+            format="webp"
+            alt={title}
+            class="max-w-full md:max-w-[13rem] rounded-lg"
+          />
+        )) || (
+
+          <div
+            class="max-w-full md:max-w-[13rem] rounded-lg mx-auto px-auto flex items-center justify-center"
+            style={{ background: getAbstractColor(title)}}
+          >
+          <span class="text-6xl font-bold text-center text-white">
+            {title[0]}
+            </span>
+          </div>
+        )
+      }
+
+      <div class="grow w-full">
+        <h1 class="text-xl font-bold">
+          {title}
+          {badge && <div class="badge badge-secondary mx-2">{badge}</div>}
+        </h1>
+        <p class="py-1 text-1xl">{desc}</p>
+        <div class="card-actions justify-end">
+          {
+            tags &&
+              tags.map((tag) => <div class="badge badge-outline">{tag}</div>)
+          }
+        </div>
+      </div>
+    </div>
+  </a>
+</div>

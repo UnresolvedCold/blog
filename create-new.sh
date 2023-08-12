@@ -2,19 +2,19 @@
 name=$1
 year=$(date +'%Y')
 date=$(date +'%b %d, %Y')
+file_date=$(date +'%Y-%m-%d')
 git fetch origin
 git checkout publish
 git pull origin publish
 git checkout -b blog-$name
-mkdir -p src/pages/posts/$year/
-new_file="src/pages/posts/$year/$name.mdx"
+new_file="src/content/blog/$file_date-$name.mdx"
 mkdir -p src/images/posts/$year/$name
 
-echo "import BlogImage from '@components/BlogImage.astro'" >> $new_file
 echo "---" > $new_file
-echo "title: Some Name" >> $new_file
-echo "description: Some Description" >> $new_file
+echo "title: $name" >> $new_file
+echo "description: $name" >> $new_file
 echo "ideaDate: $date" >> $new_file
+echo "heroImage: /hero-images/default.png" >> $new_file
 echo "---" >> $new_file
 
 # Result
