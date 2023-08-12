@@ -1,0 +1,381 @@
+---
+title: Download files via REST API using chunked transfer encoding
+description: Here, we will create a Python server that will send us a heuristic file in chunks and a Java client will read these files and download them over the REST API using chunked transfer encoding.
+ideaDate: May 26, 2023
+pubDate: 2023-05-26T01:04:53Z
+keywords: chunked transfer encoding, python, java, rest api, download file, http, http protocol, http headers, http response, http request, http status code, http methods, http get, http post, http put, http delete, http header fields, http content negotiation, http status codes, http cookies, http caching, http compression, http conditional requests, http range requests, http redirects, http authentication
+---
+
+Chunked transfer encoding is a protocol to send data in chunks over HTTP.
+This allows us to transfer a large amount of data in chunks of small size.
+
+With chunked encoding, the server splits the response into a series of smaller "chunks" of data. Each chunk includes a size indicator followed by the actual chunk data. The size indicator specifies the length of the chunk data in bytes. The chunks are sent to the client one by one and can be processed by the client as they arrive.
+
+Here, we will create a Python server that will send us a heuristic file in chunks and a Java client will read these files and download them over the REST API.
+
+## Project structure
+
+The project is a Maven project at root containing a sub-directory for our Python server.
+
+```yaml
+❯ tree .
+.
+|-- README.MD
+|-- pom.xml
+|-- python
+|   |-- requirements.txt
+|   `-- server.py
+`-- src
+    `-- main
+        `-- java
+            `-- com
+                `-- gor
+                    `-- poc
+                        |-- App.java
+                        `-- FileDownloader.java
+
+
+```
+
+## Python server
+
+This is a Flask server that exposes a `download` route.
+
+For a POC, we will just send a particular file called 'heuristics' whenever a request is made to the server.
+The server will send the files in chunks of `1024` which can be configured as per your need.
+
+```python
+# Define the route
+@app.route('/download')
+def download_file():
+    # This is the file we want to download whenever a client requests
+    file_dir = 'python/public/stream/data/'
+    file_name = "heuristics.bin"
+    file_path = file_dir + file_name
+    chunk_size = 1024
+    
+    # Create chunks and yield them whenever required
+    def generate():
+        # Chunks size of each chink of data     
+        with open(file_path, 'rb') as file:
+            while True:
+                chunk = file.read(chunk_size)
+                if not chunk:
+                    break
+                yield chunk
+
+    response = Response(
+
+        # stream_with_context is a Flask functionality to send files in chunks
+        # You can read more about it here https://flask.palletsprojects.com/en/1.0.x/patterns/streaming/
+        stream_with_context(generate()),
+        mimetype='application/octet-stream'
+    )
+    response.headers.set('Content-Disposition', 'attachment', filename=file_name)
+    return response
+```
+
+```sh
+# Let's create a heuristic file for our server to send 
+# We'll create a random file of size 1GB
+dd if=/dev/urandom of=python/public/stream/data/heuristics.bin bs=1G count=1
+```
+
+```sh
+# The below commands only works on Mac OS
+# Check the size of the file generated in bytes
+stat -f "%z" python/public/stream/data/heuristics.bin
+# 1073741824
+
+# Let's check the md5 of the file
+md5 -r python/public/stream/data/heuristics.bin | awk '{print $1}'
+# c5b8959732d3359791bcd06ca5a92dc2
+```
+
+```sh
+# For linux, you can use the below code
+# Check the size of the file generated in bytes
+stat -c "%s" python/public/stream/data/heuristics.bin
+
+# Check the md5 of the file
+md5sum python/public/stream/data/heuristics.bin | awk '{print $1}'
+
+```
+
+```sh
+# Let's run the python server now
+# We'll use a virtual environment to run the server (You can also use conda))
+source .venv/bin/activate
+
+# Install the dependencies
+pip install -r python/requirements.txt
+
+# Run the server (and keep it running)
+python python/server.py
+```
+
+We can also use `curl` to check the header.
+
+The presence of `Transfer-Encoding: chunked` tells us that the server is using the chunked protocol to send the data.
+
+```sh
+# curl the header
+# -I asks for headers only 
+# -XGET says it to use GET method (can be omited as it is the default)
+curl -I -XGET "http://localhost:5000/download"
+
+# HTTP/1.1 200 OK
+# Server: Werkzeug/2.3.4 Python/3.10.10
+# Date: Fri, 26 May 2023 00:52:01 GMT
+# Content-Type: application/octet-stream
+# Content-Disposition: attachment; filename=heuristics.bin
+# X-Chunk-Size: 1024
+# Transfer-Encoding: chunked
+# Connection: close
+```
+
+You can also use `curl` to download the file.
+
+```sh
+# Download the file in the current directory
+# First let's remove the file if it exists
+rm -rf heuristics.bin
+
+# -O says to save the file with the same name as the server
+# -J says to use the filename from the server
+# -L says to follow redirects (for us it's optional as we are not using any redirects)
+curl -O -J -L http://localhost:5000/download
+
+# Also let's verify the file size and md5 of the downloaded file
+stat -f "%z" heuristics.bin
+# 1073741824
+
+md5 -r heuristics.bin | awk '{print $1}'
+# c5b8959732d3359791bcd06ca5a92dc2
+```
+
+You can match the `md5` of the server file and what we downloaded to check the successful file transfer.
+
+## Java Client
+
+The code for downloading the file using `Java` is located at `com.gor.poc.FileDownloader`.
+
+Below is the explanation of the code.
+
+```java
+// This is the REST API which will serve you the file
+String fileUrl = "http://localhost:5000/download";
+String savePath = ""; 
+
+try {
+    // Defining the URL
+    URL url = new URL(fileUrl);
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    connection.setRequestMethod("GET");
+
+    int responseCode = connection.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+        // Get the file name from the header
+        String fileName = connection.getHeaderField("Content-Disposition");
+        fileName = fileName.substring(fileName.lastIndexOf("=") + 1);
+        String filePath = savePath + "/" + fileName;
+
+        // Create an Input stream to download the file
+        InputStream inputStream = connection.getInputStream();
+
+        // This is where the file will be saved
+        FileOutputStream outputStream = new FileOutputStream("./"+filePath);
+
+        // Read the data in chunks and save it to the file
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        
+        outputStream.close();
+        inputStream.close();
+
+        System.out.println("File downloaded successfully!");
+    } else {
+        System.out.println("File download failed. Server returned response code: " + responseCode);
+    }
+
+    connection.disconnect();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+```sh
+# You can run the java program using maven 
+# First remove the file if it exists
+rm -rf heuristics.bin
+
+# Compile and run the java program
+mvn clean compile
+mvn exec:java -Dexec.mainClass="com.gor.poc.FileDownloader"
+# [INFO] Scanning for projects...
+# [INFO] 
+# [INFO] --------------------< com.gor.poc:stream_download >---------------------
+# [INFO] Building stream_download 1.0-SNAPSHOT
+# [INFO] --------------------------------[ jar ]---------------------------------
+# [INFO] 
+# [INFO] --- exec-maven-plugin:3.1.0:java (default-cli) @ stream_download ---
+# Downloading file in chunks...
+# 27 bytes read
+# 997 bytes read
+# 25 bytes read
+# 999 bytes read
+# 25 bytes read
+
+# Get the size and md5 of the downloaded file
+stat -f "%z" heuristics.bin
+md5 -r python/public/stream/data/heuristics.bin | awk '{print $1}'
+```
+
+The output shows us that the files are downloaded in small chunks like 27 bytes, 997 bytes even though our client is reading a buffer of size 4096.
+This is because the server is sending chunks at the rate of 1024 bytes which is being consumed by the Java program much faster.
+This is one disadvantage of using chunk encoding where the client has no control over the data transfer.
+Even though the client is faster, the download is dependent on the server configurations.
+
+To solve this let's configure our Python server to send 1 MB chunks instead of 1 KB. Restart your Python server.
+
+```diff
+    file_path = file_dir + file_name
+-    chunk_size = 1024  # Adjust the chunk size as per your requirements
++    chunk_size = 1024 * 1024
+    
+    def generate():
+```
+
+```sh
+rm -rf heuristics.bin
+
+# Compile and run the java program
+mvn clean compile
+mvn exec:java -Dexec.mainClass="com.gor.poc.FileDownloader"
+# Downloading file in chunks...
+# 24 bytes read
+# 4096 bytes read
+# 4096 bytes read
+# 4096 bytes read
+```
+
+Now the file transfer is much faster but still limited because the client is consuming the data at a slower rate than what the server is sending.
+We would have increased the file transfer rate by configuring the client to read 1 MB.
+
+Let's configure our client to use the exact bytes our server is sending.
+
+For this, we'll send the chunk size used by our server as header metadata.
+
+```diff
+    response.headers.set('Content-Disposition', 'attachment', filename=file_name)
++   response.headers.set('X-Chunk-Size', str(chunk_size))  # Add chunk size as a header
+
+```
+
+And on the Java side, we can read this header and set our buffer size to match the chunk size.
+
+```diff
+    // This is the REST API which will serve you the file
+    String fileUrl = "http://localhost:5000/download"; 
+    String savePath = ""; 
+
+    try {
+      // Define the URL 
+      URL url = new URL(fileUrl);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("GET");
+
+      int responseCode = connection.getResponseCode();
+      if (responseCode == HttpURLConnection.HTTP_OK) {
+        
+        // Get the file name from the header
+        String fileName = connection.getHeaderField("Content-Disposition");
+        fileName = fileName.substring(fileName.lastIndexOf("=") + 1);
+        String filePath = savePath + "/" + fileName;
+
+        // Get the chunk size from the response headers
++       String chunkSizeHeader = connection.getHeaderField("X-Chunk-Size");
++       int chunkSize = Integer.parseInt(chunkSizeHeader);
+
+        // Create an inout stream to download the file
+        InputStream inputStream = connection.getInputStream();
+        FileOutputStream outputStream = new FileOutputStream("./" + filePath);
+
+        // Read the data in chunks and save it to the file
++       byte[] buffer = new byte[chunkSize];
+        int bytesRead;
+
+        // Check if the server supports chunked transfer encoding
+        String transferEncoding = connection.getHeaderField("Transfer-Encoding");
+        boolean isChunked = "chunked".equalsIgnoreCase(transferEncoding);
+
++        // Just to distinguish b/w chunked protocol and normal file transfer
++        if (isChunked) {
++          // Read and write the response data in chunks
++          System.out.println("Downloading file in chunks...");
++          while ((bytesRead = inputStream.read(buffer)) != -1) {
++            System.out.println(bytesRead + " bytes read");
++            outputStream.write(buffer, 0, bytesRead);
++          }
++        } else {
++          // Read and write the entire response data
++          System.out.println("Downloading file as whole");
++          while ((bytesRead = inputStream.read(buffer)) != -1) {
++            System.out.println(bytesRead + " bytes read");
++            outputStream.write(buffer, 0, bytesRead);
++          }
++        }
+
+        outputStream.close();
+        inputStream.close();
+
+        System.out.println("File downloaded successfully!");
+      } else {
+        System.out.println("File download failed. Server returned response code: " + responseCode);
+      }
+
+      connection.disconnect();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+```
+
+```sh
+rm -rf heuristics.bin
+
+# Compile and run the java program
+mvn clean compile
+mvn exec:java -Dexec.mainClass="com.gor.poc.FileDownloader"
+
+# Downloading file in chunks...
+# 24 bytes read
+# 768664 bytes read
+# 279888 bytes read
+# 24 bytes read
+# 391942 bytes read
+# 393112 bytes read
+```
+
+Looks like we are now using the full capability on the client side.
+
+## Analysis
+
+Now the only optimization we will require to send the files quickly is on the server side.
+Let's log the time it takes to download the file while using different chunk sizes on the server.
+
+| Chunk size | Time (in ms) |
+| --- | --- |
+| 512 B | 9337 |
+| 1 KB | 5150 |
+| 1 MB | 465 |
+| 64 MB | 639 |
+| 128 MB | 744 |
+| 256 MB | 740 |
+| 1 GB | 1169 |
+
+The time taken to transfer the file first decreases as we increase the chunk size and then start increasing on increasing the chunk size.
+
+The above analysis was done on Mac M1 - 2020 Model with 16 GB RAM (4 GB available).

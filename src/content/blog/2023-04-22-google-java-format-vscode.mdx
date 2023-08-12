@@ -1,0 +1,82 @@
+---
+title: Configure Google Java Formatter with VSCode
+description: This blog is on how to configure Google Java Formatter with VSCode
+ideaDate: Apr 22, 2023
+pubDate: 2023-04-22T05:07:34Z
+keywords: vscode, google java formatter, java, code formatter, code formatting
+---
+import BlogImage from '../../components/BlogImage.astro'
+import ImgSettings from '../../images/posts/2023/google-java-format-vscode/settings.png'
+
+## Introduction 
+
+Using the same code format is helpful while working on a team project. 
+This helps you in code readability and also helps you to avoid merge conflicts and makes pull requests easier to focus on.
+For this people use different code formatter like Google Java Formatter, Prettier, etc. 
+In this blog, we will see how to configure Google Java Formatter with VSCode.
+
+## Download the jar file
+
+The first thing you need to do is download the Google Formatter jar file from [here](https://github.com/google/google-java-format/releases) and keep it in your home directory. 
+You can keep it anywhere you want but I prefer to keep it in my home directory.
+Make sure you download the jar file with `-all-deps` in the name.
+
+You can also download the jar file using the following command. 
+The `-O` flag is used to specify the location where you want to download the jar file.
+The below command will download the jar file and store it in the home directory with the file name `google-code-formatter.jar`.
+
+```bash
+> wget https://github.com/google/google-java-format/releases/download/v1.16.0/google-java-format-1.16.0.jar \
+  -O ~/google-code-formatter.jar
+```
+
+## Configure the VSCode
+
+Now we will configure the VSCode to use the Google Java Formatter.
+For this, you'll need an extension called [External Formatters](https://marketplace.visualstudio.com/items?itemName=SteefH.external-formatters) extension.
+This extension helps you use an external code formatter with VSCode.
+
+To install the extension, open the VSCode and press `Cmd + Shift + X` to open the extension tab.
+Search for `External Formatters` authored by Stefan van der Haven and install it.
+
+Now open the VSCode settings by pressing `Cmd + ,` and search for `External Formatters`.
+Then click on the `Edit in settings.json` button for modifying the language setting.
+
+<BlogImage src={ImgSettings} alt="" />
+
+Now add the following code in the `settings.json` file.
+
+```json
+[
+  ...
+  "externalFormatters.languages": {
+      "java": {
+          "command": "java",
+          "arguments": [
+              "-jar",
+              "/Users/shubham.kumar/google-java-format-1.16.0-all-deps.jar",
+              "-"
+          ]
+      }
+  },
+  "[java]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "SteefH.external-formatters",
+      "editor.tabSize": 2
+  }
+]  
+```
+
+The above configuration defined inside `externalFormatters.languages` configures the External Formatters extension to use the Google Java Formatter jar file for formatting the Java files.
+This configuration tells VScode to run `java -jar /Users/shubham.kumar/google-java-format-1.16.0-all-deps.jar <your-file.java>` command for formatting your java files.
+
+The `[java]` configuration is language specific setting that tells VSCode to use the External Formatters extension for formatting the Java files and run the formatter whenever a file is saved.
+Google Java Code formatter uses 2 spaces for indentation by default.
+So we set the `editor.tabSize` to `2` for Java files. 
+
+> Note: You can also use `.vscode/settings.json` for configuring the VSCode settings for a particular project.
+
+## Conclusion
+
+In this blog, we saw how to configure Google Java Formatter with VSCode.
+Now you can use the same code formatter for all your Java projects and also use it with your team members to avoid merge conflicts and make your pull requests easier to review.

@@ -1,0 +1,190 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TimeLineElement from "../components/cv/TimeLine.astro";
+---
+
+<BaseLayout title="Resume" sideBarActiveItemID="cv">
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Profile</div>
+  </div>
+
+  <div class="mb-10 text-justify">
+    Software Development Engineer with {
+      new Date().getFullYear() - new Date("2022-07-13").getFullYear()
+    } year of experience fulltime (and {
+      new Date().getFullYear() - new Date("2022-07-13").getFullYear() + 3
+    } years of experience including internships and personal ventures). Primarily focused
+    on backend development, AI/ML and DevOps engineering with a strong interest in
+    distributed systems and cloud computing.
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Education</div>
+  </div>
+
+  <div class="time-line-container grid gap-4 mb-10">
+    <TimeLineElement
+      title="MS Mathematics"
+      subtitle="2017 to 2022 at BITS Pilani, Goa, India"
+    />
+    <TimeLineElement
+      title="BE Electrical and Electronics Engineering"
+      subtitle="2017 to 2022 at BITS Pilani, Goa, India"
+    />
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Experience</div>
+  </div>
+
+  <div class="time-line-container mb-10">
+    <TimeLineElement
+      title="Software Development Engineer"
+      subtitle="From July, 2022  at GreyOrange, Gurugram, India"
+    >
+      In the role of SDE, supported Product Architects in project initiation and
+      cross-team POCs. I built a multifleet simulator to rigorously test AI/ML
+      models, handling 80k totes, 200 bots, and 6 pps. I developed a
+      microservice for daily/on-demand training of a transit time model and
+      created a Java/Erlang wrapper for wider team integration. I integrated
+      Camunda 7 Orchestrator for customer-side apps and migrated 20 repos from
+      BitBucket to GitHub. I optimized builds, achieving 2x-3x speed using
+      custom GitHub runners and ensured timely notifications via Slack using
+      Google PubSub. My contributions span technology, efficiency, and
+      collaboration.
+    </TimeLineElement>
+
+    <TimeLineElement
+      title="Software Engineering (intern)"
+      subtitle="From Jan, 2022 to Jul, 2022 at GreyOrange, Gurugram, India"
+    >
+      Conducted a successful POC using Mulesoft's API Gateway and APiGEE X to
+      migrate a company's API infrastructure to the cloud, reducing operational
+      costs. Created dummy APIs hosted on Google Kubernetes with Nginx ingress,
+      implementing various policies and customizations. Deployed Mulesoft
+      on-premise and GCP, and enhanced a Springboot API for SKU retrieval with
+      timestamp option. Optimized Node-Red flows for synchronous inflow and
+      analyzed sub-flows for Apache-Kafka message handling.
+    </TimeLineElement>
+
+    <TimeLineElement
+      title="AI/ML Engineer (Intern)"
+      subtitle="From Jul, 2021 to Dec, 2021 at Genpact, Bangalore, India"
+    >
+      Developed a pipeline achieving 70% accuracy in recognizing 5 basic human
+      emotions from voice samples. Incorporated gender recognition and sentiment
+      analysis models with 80% and 98% accuracy respectively. Introduced a novel
+      scoring approach based on word similarity for speech-to-text metrics like
+      WER and WIL. Conducted a comprehensive analysis of Speech to Text APIs
+      (CMU Sphinx, Wit API, Assembly API, Google Speech, Deep Speech) based on
+      WER, WIL, and conversion time.
+    </TimeLineElement>
+
+    <TimeLineElement
+      title="Web Developer (intern)"
+      subtitle="From Dec, 2019 to Feb, 2020 at Eople, Pune, India"
+    >
+      Implemented firebase cloud APIs and TextLocal APIs and connected them to
+      the front end of HRMS website. Also created the OTP generation,
+      verification and authentication modules within firebase cloud itself.
+    </TimeLineElement>
+    <TimeLineElement
+      title="Electrical Engineering (intern)"
+      subtitle="From May, 2019 to Jul, 2019 at Rourkela Steel Plant, SAIL, India"
+    >
+      Compiled a report on the working of SCADA system and islanding used in the
+      power division of the plant.
+    </TimeLineElement>
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Ventures</div>
+  </div>
+
+  <div class="time-line-container mb-10">
+    <TimeLineElement
+      title="OrderUp, a product to revolutionize inventory management by restaurants and malls"
+      subtitle="From May, 2019 to Nov, 2019"
+    >
+      The service, "OrderUP" focuses on making restaurants waiterless. The key
+      idea is to implement an app that can show the menu of a restaurant upon
+      scanning a QR code of the table. After which food can be ordered directly.
+      The service also helps in keeping track of the number of available seats
+      in a restaurant. Moreover, the service was extended to support malls by
+      providing centralized control over contained shops.
+
+      <div>
+        <a
+          href="https://play.google.com/store/apps/details?id=com.schwifty.serviceplease&pli=1"
+          >View this on Play Store (deprecated now).</a
+        >
+      </div>
+    </TimeLineElement>
+    <TimeLineElement
+      title="BITS Eats, connecting all the eateries together"
+      subtitle="From Jan, 2019 to May, 2019"
+    >
+      BITS Eats is an app created to integrate all eateries in the campus of
+      BITS Goa into a single platform. It aims at decreasing the waiting time
+      and crowd that gathers around the eatery. Reduction of crowd provides
+      workers at those eateries with a clean environment and an optimized
+      payment method. This app is also integrated a delivery system that
+      provides students with some pocket money based on each delivery they made.
+    </TimeLineElement>
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Certifications</div>
+  </div>
+
+  <ul class="list-disc mx-6 mb-10 grid gap-2">
+    <li>
+      <a href="https://drive.google.com/file/d/1WxBEOm1K89fKLTe3BjpmS6crflkw9Ekr/view?usp=sharing" target="_blank"> Amazon Machine Learning School (2021-22)</a>
+    </li>
+    <li>
+      <a href="https://drive.google.com/file/d/1RXcJj2FpGGMquB6tWdEap6bTgMwLCMnU/view?usp=drivesdk" target="_blank"> Participated in WAIAEOS (organized by BITS Pilani)</a>
+    </li>
+    <li>
+      <a href="https://drive.google.com/file/d/1fFWwItDbyev8W_q40g6ZyC8lvQwh907_/view?usp=sharing" target="_blank">Intro to Technical analysis (by SEBI, organized by Quark (BITS Pilani))</a>
+    </li>
+    <li>
+      <a href="https://drive.google.com/file/d/1LEn7yw-AY1m_zkSZpIGrV2LZuoplSyFz/view?usp=sharing" target="_blank">Amazon Cloud Computing Cloud Professional (by SEBI, organized by Quark (BITS Pilani))</a>
+    </li>
+  </ul>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Skills</div>
+  </div>
+
+  <ul class="list-disc md:columns-5 columns-2 mx-6">
+    <li>Java</li>
+    <li>Erlang</li>
+    <li>bash</li>
+    <li>Python</li>
+    <li>C/C++</li>
+    <li>Spring</li>
+    <li>Springboot</li>
+    <li>Java Native</li>
+    <li>Docker</li>
+    <li>Colima</li>
+    <li>Git</li>
+    <li>GitHub Actions</li>
+    <li>Jenkins</li>
+    <li>NodeJS</li>
+    <li>Java Script</li>
+    <li>PHP</li>
+    <li>React</li>
+    <li>Astro</li>
+    <li>SCADA</li>
+    <li>PostgreSQL</li>
+    <li>Firebase Cloud</li>
+    <li>Google Cloud</li>
+    <li>AI/ML/DL</li>
+    <li>CNN</li>
+    <li>RNN</li>
+    <li>Transformers</li>
+    <li>Mulesoft</li>
+    <li>Node-Red</li>
+    <li>Google Kubernetes Engine</li>
+  </ul>
+</BaseLayout>
