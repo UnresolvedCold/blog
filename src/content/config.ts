@@ -3,7 +3,8 @@ import { z, defineCollection } from "astro:content";
 const blogSchema = z.object({
     title: z.string(),
     description: z.string(),
-    pubDate: z.coerce.date(),
+    ideaDate: z.coerce.date().optional(),
+    pubDate: z.coerce.date().optional(),
     updatedDate: z.string().optional(),
     heroImage: z.string().optional(),
     badge: z.string().optional(),

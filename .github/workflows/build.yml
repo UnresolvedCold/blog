@@ -16,7 +16,6 @@ on:
       branch: 
         required: false
         type: string
-        default: publish
         description: if provided will checkout this branch for all the process
 
 
@@ -31,7 +30,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - run: |
+      - name: Checkout ${{ inputs.branch }}
+        if: inputs.branch
+        run: |
           git checkout ${{ inputs.branch }} 
           git branch   
       - name: Get changed files
