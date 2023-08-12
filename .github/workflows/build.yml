@@ -95,7 +95,9 @@ jobs:
         # Add pubDate after ideaDate to blog
         for file in ${{ needs.evaluate-changes.outputs.raw-new-blogs }}; do
           sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" ./$file
+          sed "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" ./$file
         done
+        sleep 5
         git status
     - name: Commit changes to publish branch
       if: |
