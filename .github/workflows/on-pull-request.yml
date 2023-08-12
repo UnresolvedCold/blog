@@ -18,3 +18,4 @@ jobs:
     secrets: inherit
     with:
       deploy_site: false
+      branch: ${{ github.base_ref }}
