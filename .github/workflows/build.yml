@@ -106,7 +106,7 @@ jobs:
       with:
         commit_message: Processed Publish [skip ci]
         branch: publish
-        file_pattern: 'src/pages/posts/**/*.mdx'
+        file_pattern: 'src/content/blog/**.mdx'
         commit_user_name: Publish Bot
     - run: |
         rm -rf dist
