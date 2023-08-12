@@ -5,7 +5,11 @@ import { getCollection } from "astro:content";
 
 export async function getStaticPaths({ paginate }) {
   const posts = await getCollection("blog");
-  posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  posts.sort((a, b) => {
+    let a_date = new Date(a.data.pubDate && a.data.pubDate || a.data.ideaDate);
+    let b_date = new Date(b.data.pubDate && b.data.pubDate || b.data.ideaDate);
+    return b_date.valueOf() - a_date.valueOf()
+  });
   return paginate(posts, { pageSize: 10 });
 }
 
