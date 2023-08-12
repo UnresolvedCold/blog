@@ -10,7 +10,7 @@ import { Image } from "@astrojs/image/components";
     <div class="hero-content flex-col md:flex-row">
       
       <Image
-        src={img && img || "/hero-images/default.png"}
+        src={img && img || `https://open-graph-images-qycoxojbe-unresolvedcold.vercel.app/api/shubhamcodes_blog?title=${title}`}
         aspectRatio="16:9"
         width={750}
         format="webp"
