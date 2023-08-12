@@ -29,7 +29,6 @@ jobs:
       enable-deploy: ${{ steps.enable-deploy.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v3
-        if: !inputs.branch
         with:
           fetch-depth: 0
       - uses: actions/checkout@v3
