@@ -39,7 +39,7 @@ jobs:
         uses: tj-actions/changed-files@v34
         with:
           files: |
-            src/pages/posts/**/*.mdx
+            src/content/blog/*.mdx
       - name: Track deployable files
         id: enable-deploy
         uses: tj-actions/changed-files@v34
