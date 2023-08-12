@@ -62,7 +62,7 @@ jobs:
             echo isDraft: $isDraft
             if [[ "$isDraft" != "true" ]]; then
               rawnewblogs+=($file)
-              newblogs+=(https://shubham.codes${file:9:-4})
+              newblogs+=(https://shubham.codes${file:11:-4})
             fi
           done
           newblogs=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${newblogs[@]}")
