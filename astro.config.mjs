@@ -11,7 +11,7 @@ import image from "@astrojs/image";
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://astrofy-template.netlify.app',
+  site: 'https://shubham.codes/',
   markdown: {
     shikiConfig: {
       theme: "dracula"
