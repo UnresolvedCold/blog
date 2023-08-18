@@ -1,0 +1,236 @@
+---
+title: Docker Desktop vs Colima on Mac M1 for working with VSCode containers
+description: A read/write speed comparison between Docker Desktop and Colima on Mac M1 for developing in devcontainers and VSCode.
+ideaDate: Aug 18, 2023
+draft: false
+heroImage: /hero-images/devcontainer-docker.png
+keywords: devcontainers, docker, colima, vscode, mac m1, performance, read, write, speed, comparison
+tags: devcontainers, docker, colima, vscode, mac m1, performance, read, write, speed, comparison
+---
+
+## Introduction
+
+I am assuming that you have a basic understanding of `docker` and `devcontainers` and have used them before.
+As this post revolves around Mac M1, I'd suggest not using this analysis for comparing other systems in general.
+
+VSCode `devcontainers` are the new way of starting a project development environment.
+They are a great way to get started with a project without having to install all the dependencies on your local machine.
+This reduces the setup time and allows you to get started with the project right away.
+
+`Devcontainers` are powered by Docker and VSCode.
+VSCode provides the UI and Docker provides the containerization.
+This means that you need to have Docker installed on your machine to use `devcontainers`.
+
+While `docker` is the main engine,
+`Docker Desktop` and `Colima` are the two main options for creating a `docker` environment on Mac.
+
+`Colima` is an open-source alternative to `Docker Desktop`.
+While both software are free to use, `Docker Desktop` requires companies to pay for a license if they have more than 250 employees.
+And also, `Docker Desktop` can be enhanced with lots of extensions which Colima can't.
+
+I am using `docker` for mainly 2 things, creating production-level containers and using `devcontainers` for development.
+So a lot of `Docker Desktop` extensions are not useful for me but the performance is.
+
+I analyzed the read/write performance of `Docker Desktop` and `Colima` for working with `devcontainers` and here are the results.
+I also compared the build time for my blog on both the software.
+
+## System Information
+
+I am using a Macbook Air M1 with 16 GB RAM.
+I have allocated 8 GB RAM and 4 CPUs to Docker Desktop and Colima each.
+I also kept the disk storage to 60 GB for both the software which would be enough for our testing.
+
+### Docker Desktop
+
+I'm using Docker Desktop `v24.2` which comes with a `60%` improvement in read/write performance (as they say).
+It's using Apple's `VZ` for virtualization and the net says it is far more optimized than `Qemu`.
+I have no extensions installed on Docker Desktop.
+And no other container was running at the time of analysis.
+
+### Colima
+
+The latest version of Colima is `v0.5.5` at the time of writing this article.
+It was released on May 2023.
+For the comparison, I'm using the `HEAD` of the [Colima](https://github.com/abiosoft/colima) repository to capture any latest improvements.
+
+I tested Colima with both `Qemu` and `VZ` virtualization.
+
+> Using the `HEAD` can be unstable compared to the release branches.
+
+## Analysis Procedure
+
+I created a simple `Java` app for writing files of size `1 MB` to `1 GB` and calculated the time it takes to write each of the files.
+File sizes are `1 MB`, `10 MB`, `64 MB`, `128 MB`, `256 MB`, `512 MB`, and `1024 MB`.
+
+I created an arbitrary `1 GB` file and accessed the random positions `1,000` to `1,000,000` times and calculated the average.
+
+I also calculated the time it takes to print lines on the console using `sout`.
+I printed `10,000`, `100,000`, and `1,000,000` lines of `1` to `1000` characters each and calculated the average time.
+
+> You can find the Java app [here](https://github.com/UnresolvedCold/poc-performance-devcontainer).
+
+My blog is made on `AstroJs` which generates a static site on build.
+The build process involves compressing the images, minifying the CSS and JS, MDX to MD conversion, HTML conversion and so on.
+This uses a lot of read/write operations hence I think it would be a good test of the performance.
+So I calculated the build time and the first render time of the blog on both systems to get a real feel of the performance.
+
+### Changing between Docker Desktop and Colima
+
+I made sure to shut down Colima before starting Docker Desktop and vice versa.
+Docker desktop can be switched on/off from the UI.
+
+### Commands Used
+
+#### Colima stop and delete settings
+
+```bash
+colima stop
+colima delete
+```
+
+#### Start Colima
+
+To start Qemu mode
+
+```bash
+colima start --cpu 4 --memory 8 --arch aarch64 --vm-type qemu
+```
+
+To start VZ mode
+
+```bash
+colima start --cpu 4 --memory 8 --arch aarch64 --vm-type=vz --vz-rosetta
+```
+
+## Results
+
+### Write Performance
+
+#### Docker Desktop
+
+| File size | Duration (Worst)    | Duration (Best)     |
+| --------- | ------------------- | ------------------- |
+| 1 MB      | 311 ms              | 227 ms              |
+| 10 MB     | 1998 ms (2s)        | 1943 ms (2 s)       |
+| 64 MB     | 14433 ms (14 s)     | 12016 ms (12 s)     |
+| 128 MB    | 24745 ms (24 s)     | 23455 ms (23 s)     |
+| 256 MB    | 58937 ms (1 min)    | 52252 ms (52 s)     |
+| 512 MB    | 114213 ms (1.9 min) | 110060 ms (1.8 min) |
+| 1024 MB   | 262955 ms (4.38)    | 194817 ms (3.2 min) |
+
+#### Colima (Qemu)
+
+| File Size | Duration (Worst)     | Duration (Best) |
+| --------- | -------------------- | --------------- |
+| 1 MB      | 573 ms               | 286 ms          |
+| 10 MB     | 3077 ms (3s)         | 2345 ms         |
+| 64 MB     | 19087 ms (19 s)      | 14116 ms        |
+| 128 MB    | 38191 ms (38 s)      | 26096 ms        |
+| 256 MB    | 81071 ms (1.35 min)  | 67062 ms        |
+| 512 MB    | 151242 ms (2.52 min) | 159663 ms       |
+| 1024 MB   | 293370 ms (4.89 min) | 301629 ms       |
+
+#### Colima (VZ + Rosetta 2)
+
+| File size | Duration (worst)     | Duration (best) |
+| --------- | -------------------- | --------------- |
+| 1 MB      | 291 ms               | 236 ms          |
+| 10 MB     | 2113 ms (2s)         | 2199 ms         |
+| 64 MB     | 12453 ms (12 s)      | 12262 ms        |
+| 128 MB    | 25315 ms (25 s)      | 24603 ms        |
+| 256 MB    | 49837 ms (49 min)    | 50475 ms        |
+| 512 MB    | 101883 ms (1.69 min) | 100692 ms       |
+| 1024 MB   | 198126 ms (3.30 min) | 200163 ms       |
+
+### Read Performance
+
+Shockingly, the read performance of Docker Desktop is very bad compared to Colima with a peak of `13 reads/ms`.
+Colima with `Qemu` has a peak of `729 reads/ms` and Colima with `VZ` has a peak of `705 reads/ms`
+which is almost comparable.
+
+Surprisingly, the read performance of `Qemu` is better than `VZ`.
+
+#### Docker Desktop
+
+| number of random reads | Duration (Total) | Average Speed    |
+| ---------------------- | ---------------- | ---------------- |
+| 1,000,000              | 80593 - 81941 ms | 12 reads/ms      |
+| 500,000                | 38238 - 39058 ms | 12 - 13 reads/ms |
+| 200,000                | 15299 - 15368 ms | 12 - 13 reads/ms |
+| 100,000                | 7755 - 7895 ms   | 12 reads/ms      |
+| 10,000                 | 726 - 876 ms     | 11 - 12 reads/ms |
+| 1,000                  | 81 - 107 ms      | 9 - 12 reads/ms  |
+ 
+I ran this 5 times and even restarted the docker engine multiple times but the results were the same.
+If anyone knows why this is happening, please let me know.
+
+#### Colima (Qemu)
+
+| number of random reads | Duration (Total) | Average Speed      |
+| ---------------------- | ---------------- | ------------------ |
+| 1,000,000              | 1415 - 1419 ms   | 704 - 707 reads/ms |
+| 500,000                | 686 - 695 ms     | 696 - 719 reads/ms |
+| 200,000                | 276 - 278 ms     | 719 - 728 reads/ms |
+| 100,000                | 137 - 141 ms     | 709 - 724 reads/ms |
+| 10,000                 | 15 - 17 ms       | 666 - 729 reads/ms |
+| 1,000                  | 2 - 3 ms         | 333 - 500 reads/ms |
+
+#### Colima (VZ + Rosetta 2)
+
+| number of random reads | Duration (Total) | Average Speed       |
+| ---------------------- | ---------------- | ------------------- |
+| 1,000,000              | 1493 - 1507 ms   | 663 - 669 reads/ms  |
+| 500,000                | 709 - 721 ms     | 693 - 705 reads/ms  |
+| 200,000                | 284 - 286 ms     | 699 - 704 reads/ms  |
+| 100,000                | 143 ms           | 699 reads/ms        |
+| 10,000                 | 15 - 16 ms       | 625 - 666 reads/ms  |
+| 1,000                  | 1 -2 ms          | 500 - 1000 reads/ms |
+
+### Print Performance
+
+`Docker Desktop` has the best print performance of all the three with a peak of `4074 chars/ms`.
+`Colima` with `VZ` comes second with a peak of `2984 chars/ms`.
+
+#### Docker Desktop
+
+| number of lines to print | number of chars printed | total time | Avg (per line) | Avg (per character) |
+| ------------------------ | ----------------------- | ---------- | -------------- | ------------------- |
+| 10,000                   | 4,997,048               | 1346 ms    | 7 lines/ms     | 3712 chars/ms       |
+| 100,000                  | 49.999,881              | 12272 ms   | 8 lines/ms     | 4074 chars/ms       |
+| 1,000,000                | 500,324,217             | 122849 ms  | 8 lines/ms     | 4072 chars/ms       |
+
+#### Colima (Qemu)
+
+| number of lines to print | number of chars printed | total time | Avg (per line) | Avg (per character) |
+| ------------------------ | ----------------------- | ---------- | -------------- | ------------------- |
+| 10,000                   | 5,013,996               | 2019 ms    | 4 lines/ms     | 2483 chars/ms       |
+| 100,000                  | 50,028,339              | 19253 ms   | 5 lines/ms     | 2598 chars/ms       |
+| 1,000,000                | 500,593,068             | 180024 ms  | 5 lines/ms     | 2780 chars/ms       |
+
+#### Colima (VZ + Rosetta 2)
+
+| number of lines to print | number of chars printed | total time | Avg (per line) | Avg (per character) |
+| ------------------------ | ----------------------- | ---------- | -------------- | ------------------- |
+| 10,000                   | 5,030,577               | 1752 ms    | 5 lines/ms     | 2871 chars/ms       |
+| 100,000                  | 50,010,997              | 16755 ms   | 5 lines/ms     | 2984 chars/ms       |
+| 1,000,000                | 499,828,875             | 169597 ms  | 5 lines/ms     | 2947 chars/ms       |
+
+### Blog Performance
+
+| System                | Build time  | Initial rendering time |
+| --------------------- | ----------- | ---------------------- |
+| Host                  | 673 - 711 s | 42.69 ms               |
+| Colima (Qemu)         | 817 - 836 s | 6.7 s                  |
+| Colima (VZ + Rosseta) | 671 - 924 s | 4.8 s                  |
+| Docker Desktop        | 824 - 828 s | 5.6 s                  |
+
+Compared to the host, the build time is almost the same for all the systems but `Colima` with `VZ` is the best among them
+with the fastest build comparable to the host system.
+None of them came close to the host system in terms of rendering time (as expected).
+
+## Summary
+
+`Docker Desktop` can be a better option for apps that require a lot of printing but fewer Read/Write operations.
+When it comes to extensive Read/Write operations,
+`Colima` with `VZ + Rosseta 2` would be my choice because it gives you better write and print performance than `Qemu`.
+For my blog, I will be using `Colima` with `VZ + Rosseta 2` because it gives me the best build time and read/write performance.
