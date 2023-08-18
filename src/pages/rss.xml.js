@@ -3,6 +3,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../config";
 import { getCollection } from "astro:content";
 import sanitizeHtml from 'sanitize-html';
 import MarkdownIt from 'markdown-it';
+import mdxclean from '../utils/rss_conv.js';
 const parser = new MarkdownIt();
 
 export async function get(context) {
@@ -15,7 +16,7 @@ export async function get(context) {
       title: post.data.title,
       pubDate: post.data.pubDate,
       description: post.data.description,
-      content: sanitizeHtml(parser.render(post.body)),
+      content: sanitizeHtml(parser.render(mdxclean(post.body))),
       link: `/blog/${post.slug}/`,
     })),
   });
