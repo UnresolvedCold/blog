@@ -1,6 +1,6 @@
 ---
 title: Communication b/w Java (Maven) and Erlang (rebar3) using Jinterface
-description: Jinterface is a way to make Java programs behave like Erlang nodes to make the communication b/w them compatible
+description: Jinterface is a way to make Java programs behave like Erlang nodes. This ensures seamless communication between Erlang and Java programs. 
 ideaDate: Aug 22, 2023
 pubDate: 2023-08-26T09:38:06Z
 draft: false
@@ -11,7 +11,8 @@ tags: erlang, java, jinterface, rebar3, maven, epmd, opt
 
 ## Introduction 
 
-`Jinterface` is a way to make `Java` programs behave like `Erlang` nodes to make the communication b/w them compatible. 
+`Jinterface` is a way to make `Java` programs behave like `Erlang` nodes.
+This ensures seamless communication between `Erlang` and `Java` programs. 
 `Jinterface` exposes some APIs that you can use to create `Erlang` data structures and send them to `Erlang` nodes.
 
 ## How to use Jinterface
@@ -32,7 +33,7 @@ OtpErlang.jar
 ```
 
 It may happen that the file isn't there. This is because `Jinterface` is not installed by default.
-In this case, you will need to install `Erlang` from the source with `Java` installed on the path. 
+In this case, you will need to install `Erlang` from the source with `Java 8+` installed on the path. 
 
 > If you have installed `Erlang` using `homebrew` on *macOS* then it might not be there.
 
