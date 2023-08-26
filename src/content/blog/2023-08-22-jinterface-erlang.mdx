@@ -1,0 +1,280 @@
+---
+title: Communication b/w Java (Maven) and Erlang (rebar3) using Jinterface
+description: Jinterface is a way to make Java programs behave like Erlang nodes to make the communication b/w them compatible
+ideaDate: Aug 22, 2023
+draft: false
+heroImage: /hero-images/erlang_java.png
+keywords: erlang, java, jinterface, rebar3, maven, epmd, opt
+tags: erlang, java, jinterface, rebar3, maven, epmd, opt
+---
+
+## Introduction 
+
+`Jinterface` is a way to make `Java` programs behave like `Erlang` nodes to make the communication b/w them compatible. 
+`Jinterface` exposes some APIs that you can use to create `Erlang` data structures and send them to `Erlang` nodes.
+
+## How to use Jinterface
+
+### Installation
+
+For using `Jinterface` you need a `jar` file provided by `Erlang` called `OtpErlang.jar`.
+You can find the location of the `jar` by opening `erlang` shell and typing the below command.
+This will provide you with the location of the jar file.
+
+```erlang
+> code:priv_dir(jinterface).
+"/usr/local/lib/erlang/lib/jinterface-1.13.2/priv"
+```
+```bash
+$ ls "/usr/local/lib/erlang/lib/jinterface-1.13.2/priv"
+OtpErlang.jar
+```
+
+It may happen that the file isn't there. This is because `Jinterface` is not installed by default.
+In this case, you will need to install `Erlang` from the source with `Java` installed on the path. 
+
+> If you have installed `Erlang` using `homebrew` on *macOS* then it might not be there.
+
+So first make sure, you have `Java` runtime installed. If not, then please install this first.
+
+```bash
+$ java -version
+openjdk version "20.0.1" 2023-04-18
+OpenJDK Runtime Environment (build 20.0.1+9-29)
+OpenJDK 64-Bit Server VM (build 20.0.1+9-29, mixed mode, sharing)
+```
+Remove your old installation of `Erlang` if you have any.
+Then clone the `Erlang` repository and build it from the source.
+
+```bash
+$ git clone https://github.com/erlang/otp.git
+$ cd otp
+$ git checkout maint-25
+$ ./configure && make && make install
+```
+
+Also, verify if the jar has been installed correctly as we did earlier.
+
+### Creating a Java node
+
+#### New Maven Project
+
+Let's first create a new `maven` project.
+
+```bash
+$ mvn archetype:generate -DgroupId=com.example \
+    -DartifactId=myproject \
+    -DarchetypeArtifactId=maven-archetype-quickstart \
+    -DinteractiveMode=false
+```
+
+And you might also want to update the `Java` version and `encoding` by adding/updating the below properties in `pom.xml`.
+
+```xml
+<properties>
+    <maven.compiler.source>20</maven.compiler.source>
+    <maven.compiler.target>20</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+</properties>
+```
+
+#### Adding Jinterface dependency
+
+The easiest way is to install your `jar` in `m2` and add it to your dependency.
+
+```bash
+$ mvn install:install-file \
+   -Dfile=/usr/local/lib/erlang/lib/jinterface-1.13.2/priv/OtpErlang.jar \
+   -DgroupId=com.ericsson.otp \
+   -DartifactId=erlang \
+   -Dversion=1.13.2 \
+   -Dpackaging=jar \
+   -DgeneratePom=true
+```
+
+And then add the dependency in `pom.xml`.
+
+```xml
+<dependency>
+    <groupId>com.ericsson.otp</groupId>
+    <artifactId>erlang</artifactId>
+    <version>1.13.2</version>
+</dependency>
+```
+
+#### Creating a Java node
+
+This is the fun part.
+Each `Java` app will contain a node and a mailbox.
+We can send the message to the node on a particular mailbox and the node will receive the message and process it exactly like `Erlang` nodes.
+
+But first, import the required packages.
+
+```java
+import com.ericsson.otp.erlang.*;
+```
+
+Let's create a node called, 'java_node' and a mailbox called, 'java_mailbox'.
+
+```java
+OtpNode node = new OtpNode("java_node");
+OtpMbox mbox = node.createMbox("java_mailbox");
+```
+
+Next, let's say we will be sending the node a tuple containing the `Pid` of the Erlang node and a message atom called `hello`.
+On receiving `{Pid, hello}` as the message, we will send 'world' as a message to the calling node.
+
+The `mbox.receive()` function will pause the execution of the program until it receives a message.
+We are typecasting the received message to `OtpErlangTuple` because we know that the message will be a tuple and let's extract the `Pid` and the message atom from the tuple.
+
+```java
+// Get the message
+OtpErlangTuple erlTuple = (OtpErlangTuple) mbox.receive();
+
+// Parse the message
+OtpErlangPid fromPid = (OtpErlangPid) erlTuple.elementAt(0);
+OtpErlangAtom atom = (OtpErlangAtom) erlTuple.elementAt(1);
+```
+
+Now we will check if the message is `hello` and if that is the case, we will send `world` as a message to the calling node.
+Messages can be sent using the `mbox.send()` function.
+
+```java
+if (atom.atomValue().equals("hello")) {
+    // Create the reply message
+    OtpErlangAtom replyAtom = new OtpErlangAtom("world");
+    OtpErlangObject[] replyElements = {new OtpErlangAtom("ok"), replyAtom};
+    OtpErlangTuple replyTuple = new OtpErlangTuple(replyElements);
+    
+    // This will send the message to the calling node with Pid as fromPid
+    mbox.send(fromPid, replyTuple);
+}
+```
+
+#### Alive function
+
+You might want to create a health checker function to get a reply on pinging the node.
+This is done by creating a `isAlive` function and it comes in handy while debugging and in code as a sanity check.
+
+```java
+public boolean isAlive() {
+        return true;
+    }
+```
+
+#### Final Java code
+
+Your final `Java` code will look something like this.
+
+```java
+package com.example;
+
+import com.ericsson.otp.erlang.*;
+
+public class HelloWorld {
+    public boolean isAlive() {
+            return true;
+        }
+
+    public static void main(String[] args) throws Exception {
+         OtpNode node = new OtpNode("java_node");
+         OtpMbox mbox = node.createMbox("java_mailbox");
+         System.out.println("Node Created. Now, you can communicate with this node.");
+         OtpErlangTuple erlTuple = (OtpErlangTuple) mbox.receive();
+         OtpErlangPid fromPid = (OtpErlangPid) erlTuple.elementAt(0);
+         OtpErlangAtom atom = (OtpErlangAtom) erlTuple.elementAt(1);
+         if (atom.atomValue().equals("hello")) {
+             OtpErlangAtom replyAtom = new OtpErlangAtom("world");
+             OtpErlangObject[] replyElements = {new OtpErlangAtom("ok"), replyAtom};
+             OtpErlangTuple replyTuple = new OtpErlangTuple(replyElements);
+             mbox.send(fromPid, replyTuple);
+         }
+    }
+}
+
+```
+
+You can verify if your `Java` app is being registered as a node using the below commands in the `Erlang` shell.
+As we have implemented the `isAlive` function, we can also `ping` the node. 
+A return value of `pong` means success and `pang` means failure.
+
+```erlang
+$ erl -sname client
+> net_adm:names().
+{ok,[{"java_node",59873}]}
+
+> net_adm:ping(java_node@GGN002262).       
+pong
+```
+
+### Erlang Node
+
+#### Erlang program
+
+On the `Erlang` side we can just send the message to the `java_node` and wait for a message.
+
+> The `GGN002262` part of my node is my hostname. Use the `hostname` command to get yours.
+
+```erlang
+-module(client).
+-export([start/0]).
+
+start() ->
+  {java_mailbox, 'java_node@GGN002262'} ! {self(), hello},
+  receive
+
+  {ok, Res} ->
+     io:format("Java says: ~p~n", [Res])
+  end.
+```
+
+#### Run a distributed service
+
+You will need to start the `Erlang` runtime as a distributed service.
+This can be done using `-sname` flag. 
+
+```bash
+$ erl -sname client
+1> c(client).
+2> client:start().
+Java says: world
+```
+
+## Starting EPMD
+
+`epmd` program comes prepacked with the `Erlang` distribution. 
+This is the `Erlang` port manager.
+This is required for registering nodes.
+
+If `epmd` is not running then you will get an error something like this, `Nameserver not responding on GGN002262 when publishing java_node`.
+
+To start the `epmd` server, you just need to run `epmd` from your shell.
+
+```bash
+# Start epmd server in the background
+$ epmd&
+
+# Run the Java app
+> java -jar my-app.jar
+
+# Verify if the app is getting registered.
+$ epmd -names
+epmd: up and running on port 4369 with data:
+name java_node at port 59873
+```
+
+If your `Java` app is registered, you will get the above output.
+
+## Conclusion 
+
+Here, we discussed how to use `Jinterface` to communicate with `Erlang` using `Java`. 
+We saw that `Java` programs can behave as `Erlang` nodes and can communicate with each other through message passing.
+We also learned about `epmd`, the Erlang port manager.
+
+One thing to consider while using `Jinterface` is it simulates the `Java` node as an `Erlang` node, which makes the communication a little bit slow hence this approach should not be taken for a system that requires high-frequency message transfer.
+
+It is also important to note that by default, this process of message transfer is `async` which means we will need to wait for `Java` to process the result and send a message back.
+There are ways to make this `synchronous` by creating a mechanism to send a confirmation message from the client side on receiving the processed message.
+
+Overall, this is a great add-on to `Erlang` that pumps the power of `Java` into `Erlang's` world.
