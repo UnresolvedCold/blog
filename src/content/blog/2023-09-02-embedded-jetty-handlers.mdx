@@ -1,0 +1,373 @@
+---
+title: Embedded Jetty server with handlers for legacy Java applications
+description: A simple way to embed a Jetty server in a Java application and add handlers for different requests
+ideaDate: Sep 02, 2023
+draft: true
+heroImage: /hero-images/java-jetty-handler.png
+---
+
+import PlantUML from '../../components/PlantUML.astro'
+
+
+## Introduction
+
+[Jetty](https://eclipse.dev/jetty/) is a very powerful yet lightweight `Java` library since ages that helps you create servers and clients for HTTP (literally all the versions), Web Sockets, OSGI, JMX, JAAS and much more.
+
+This post will deal with embedding a Jetty server in a Java application and adding handlers for different requests.
+I'm assuming you have a basic understanding of Java and Maven and have familiarity with different HTTP methods like GET, POST, PUT, DELETE, etc.
+
+## Jetty Server Architecture
+
+An incoming request is handled using 4 components - Threadpool, Connectors, Handlers and Server.
+`Server` is the core of the system that handles the management of servers and the entire lifecycle of the server.
+`Connectors` help in accepting various requests over different protocols like HTTP, HTTPS, etc.
+`Handlers` are the components that process the incoming request.
+`Threadpools` are like tiny workers that make the system multi-threaded and help in handling multiple requests at the same time.
+
+An incoming request is first accepted at the `Connector`.
+Then it is sent to the `Server` which connects it to the `Handler` where the main response is generated.
+And the response is generated using a particular thread as per `Threadpool`.
+
+<PlantUML context=""> 
+```plantuml alt=Jetty server architecture, width=90%
+node Connectors
+node Server
+node Handler 
+node Threadpool
+Connectors -R-> Server
+Server -D-> Handler
+Server -R-> Threadpool
+
+```
+</PlantUML>
+
+
+## Using Jetty in a Java application
+
+### New Java App
+
+First, let's create a new `Java` app using `Maven`. 
+
+```bash
+> mvn archetype:generate \
+-DgroupId = com.schwiftycold.poc \
+-DartifactId = poc_jetty_server \
+-DarchetypeArtifactId = maven-archetype-quickstart \
+-DinteractiveMode = false
+```
+
+Add the following properties to your `POM` file.
+This will set the `Java` version and language encoding for the app.
+
+```xml
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>20</maven.compiler.source>
+    <maven.compiler.target>20</maven.compiler.target>
+  </properties>
+```
+
+### Add Jetty dependency
+
+Add the following dependency in your `pom.xml` file.
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-server</artifactId>
+    <version>11.0.3</version>
+  </dependency>
+  ...
+</dependencies>
+```
+
+### Main server
+
+The main component of the system is the server class.
+This class will create a server context and register connectors and handlers.
+Let's call this class `MainServer`.
+
+#### Threadpool
+
+There are different kinds of Threadpool offered by Jetty like `QueuedThreadPool`, `ExecutorThreadPool`, `ScheduledThreadPool`, etc.
+
+`QueuedThreadPool` maintains a fixed number of threads and a queue to manage incoming requests.
+When a request comes and the thread is busy then it is added to the queue and will be picked when a thread is available.
+And, due to its nature, this is widely used for handling `http` requests.
+
+`ScheduledThreadPool` extends `QueuedThreadPool` to handle scheduled tasks. 
+It provides us with a scheduler to execute tasks at a certain interval.
+It is generally used for scheduling background tasks.
+
+`ExecutorThreadPool` enables you to use custom `Executor` as the Threadpool for Jetty.
+
+Here, we will be using `QueuedThreadPool`.
+
+```java
+ThreadPool threadPool = new QueuedThreadPool();
+```
+
+#### Server
+
+The server is the essential component that manages the connectors and handlers.
+It takes the Threadpool to create a new server instance.
+
+```java
+Server server = new Server(threadPool);
+```
+
+#### Connector
+
+A connector allows us to accept a variety of different protocols like `HTTP`, `HTTPS`, `Unix domain socket`, etc. 
+
+##### HTTP
+
+A simple `HTTP` connector can be initialized using the `ServerConnector` class. 
+And you can change the port to listen to using, `setPort` function. 
+By default, the port is `8080`.
+
+```java
+ServerConnector connector = new ServerConnector(server);
+connector.setPort(9120);
+server.setConnectors(new Connector[]{connector});
+
+```
+
+#####  HTTPS
+
+For using `HTTPS` you'll need to register the `SSL/TLS` certificate. 
+We won't be using this here but a quick look into this will give us a glance of the infinite possibilities.
+
+First, you will need the sslContextFactory which defines your `SSL/TLS` configurations.
+
+```java
+SslContextFactory sslContextFactory = new SslContextFactory();
+sslContextFactory.setKeyStorePath("/path/to/keystore.jks");
+sslContextFactory.setKeyStorePassword("keystore-password");
+sslContextFactory.setKeyManagerPassword("key-password");
+```
+
+```java
+ServerConnector httpsConnector = new ServerConnector(
+    server,
+    new SslConnectionFactory(sslContextFactory, "http/1.1")
+);
+httpsConnector.setPort(8443);
+server.setConnectors(new Connector[] {httpsConnector});
+```
+
+#### Handlers
+
+Handlers are the ones that will be creating or response. 
+For this, let's create a new singleton class.
+Let's set this to `null` for now.
+
+```java
+server.setHandler(null);
+```
+
+#### Final code
+
+```java
+public class MainServer {
+  public static void startServer()  {
+    try {
+      ThreadPool threadPool = new QueuedThreadPool();
+
+      Server server = new Server(threadPool);
+
+      ServerConnector connector = new ServerConnector(server);
+      connector.setPort(9120);
+      
+      server.setConnectors(new Connector[]{connector});
+      server.setHandler(null);
+
+      server.start();
+      server.join();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
+
+```
+
+### Handler class
+
+Handler class is where we will write our logic to process the request.
+So this requires a special attention.
+
+Let's create a new class that extends `AbstractHandler`
+
+#### Extend AbstractHandler
+
+The `AbstractHandler` required us to implement a `handle` function.
+This function is triggered on every new request.
+
+The handle method uses four parameters.
+The `target` parameter denotes the endpoint that was triggered.
+If we trigger the URL, `http://localhost:9120/hi` then the target will take the value as `/hi`.
+
+`baseRequest` and `request` denote the same thing but in a different context. 
+`baseRequest` is Jetty specific whereas `request` donates the servlet-specific APIs.
+Here, we won't be using the servlet APIs.
+
+The `response` is the processed result generated by the server which will be sent to the client.
+
+```java
+public class MainHandler extends AbstractHandler{
+
+  @Override
+  public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+      throws IOException, ServletException {
+        System.out.println("target: " + target);
+        System.out.println("baseRequest: " + baseRequest);
+        System.out.println("request: " + request);
+        System.out.println("response: " + response);     
+  }
+}
+```
+
+The output of the above code would be something as follows on triggering with `curl`.
+
+```bash
+> curl -X POST "http://localhost:9120/hi" -d "p=value"
+
+target: /hi
+baseRequest: Request(POST http://localhost:9120/hi)@57ffc3ca
+request: Request(POST http://localhost:9120/hi)@57ffc3ca
+response: HTTP/1.1 200
+```
+
+Here, you can see the target as `/hi`, the request denotes the method call and reference to the request object and the response is just 200 which denotes a success.
+We can manipulate this information to create responses based on different inputs.
+
+#### Manage different methods
+
+We can get the request method using the response object by calling the function, `getMethod`.
+
+```java
+public void handle(...) {
+    if ("POST".equalsIgnoreCase(baseRequest.getMethod())) {
+      System.out.println("POST request received");
+    }
+    else if ("GET".equalsIgnoreCase(baseRequest.getMethod())) {
+      System.out.println("GET request received");
+    }
+}
+```
+
+Now, calling curl as above will print `POST request received` on the server side.
+
+#### Extract the query parameters 
+
+The query parameter and its values can be extracted from the base request object by using the `getParameterNames` method.
+Here, I'm parsing the values and storing them in a `Map` for accessing them later.
+
+```java
+if ("POST".equalsIgnoreCase(baseRequest.getMethod())) {
+  System.out.println("POST request received");
+  Map<String, String> queryParams = new HashMap<>();
+
+  for (Enumeration<String> e = request.getParameterNames(); e.hasMoreElements();) {
+    String name = e.nextElement();
+    String[] values = request.getParameterValues(name);
+    for (String value : values) {
+      queryParams.put(name, value);
+    }
+  }
+
+  System.out.println("Query params: " + queryParams);
+  ...
+```
+
+Now, you can see the below response on the server side.
+
+```bash
+POST request received
+Query params: {p=value}
+```
+
+#### Generating the result 
+
+The last part is generating the result for specific triggers. 
+This is done by using `getWriter` function to write to the response.
+You can also set the status of the response using `setStatus` method.
+You can create more `if` statements for each endpoint. 
+
+
+```java
+try {
+  if (target.startsWith("/hi")) {
+    response.setStatus(HttpServletResponse.SC_OK);
+    response.getWriter().println("Hello World");
+    baseRequest.setHandled(true);
+  }
+} catch (Exception e) {
+  e.printStackTrace();
+}
+```
+
+#### Final handle method
+
+```java
+  public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+      throws IOException, ServletException {
+    if ("POST".equalsIgnoreCase(baseRequest.getMethod())) {
+      System.out.println("POST request received");
+      Map<String, String> queryParams = new HashMap<>();
+
+      for (Enumeration<String> e = request.getParameterNames(); e.hasMoreElements();) {
+        String name = e.nextElement();
+        String[] values = request.getParameterValues(name);
+        for (String value : values) {
+          queryParams.put(name, value);
+        }
+      }
+
+      System.out.println("Query params: " + queryParams);
+
+      System.out.println("Target: " +target.startsWith("/hi"));
+
+      try {
+        if (target.startsWith("/hi")) {
+          System.out.println("Target: " +target);
+          response.setStatus(HttpServletResponse.SC_OK);
+          response.getWriter().println("Hello World");
+          baseRequest.setHandled(true);
+        }
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+      }
+
+    } else if ("GET".equalsIgnoreCase(baseRequest.getMethod())) {
+      System.out.println("GET request received");
+    }
+  }
+
+```
+
+
+#### Connect Handler and  MainServer
+
+Before testing your new server, you'll also need to add the handler which can be done using the server's `setHandler` method.
+
+```java
+server.setHandler(new MainHandler());
+```
+
+Now calling the `hi` endpoint will return `Hello World` as a response.
+
+```bash
+> curl -X POST "http://localhost:9120/hi" -d "p=value"
+
+Hello World
+```
+
+## Conclusion
+
+In this post, we saw how to configure `Jetty` server and set handlers to generate responses for a particular endpoint trigger.
+This looks like a long post but it revolves around just creating a 'Hello World' server using `Jetty`.
+You can find the code for the above [here](https://github.com/UnresolvedCold/POC-Jetty-Server-Handlers).

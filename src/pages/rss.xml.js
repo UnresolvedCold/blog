@@ -14,7 +14,7 @@ export async function get(context) {
     site: import.meta.env.SITE,
     items: blog.map((post) => ({
       title: post.data.title,
-      pubDate: post.data.pubDate,
+      pubDate: post.data.pubDate == undefined? post.data.ideaDate : post.data.pubDate,
       description: post.data.description,
       content: sanitizeHtml(parser.render(mdxclean(post.body))),
       link: `/blog/${post.slug}/`,
