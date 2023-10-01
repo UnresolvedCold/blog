@@ -1,0 +1,182 @@
+---
+title: Running AI/ML predictions in CPP using cPMML library
+description: This is a short blog on how to install cPMML library and run AI/ML predictions in CPP.
+ideaDate: Oct 02, 2023
+draft: false
+heroImage: /hero-images/cpmml.png
+keywords: cpmml, pmml, cpp, ai, ml, predictions, machine learning, artificial intelligence
+---
+
+## Introduction
+
+`PMML` is a markup language to save your AI/ML model files 
+so that you can use them for predictions later on 
+(maybe during production).
+`cPMML` is a library created by the 
+[AmadeusITGroup](https://github.com/AmadeusITGroup/cPMML) 
+to parse and run predictions in C++.
+In this blog, we will train a linear regression model in 
+`python` and generate a `pmml` file and then we will 
+run our predictions in `C++`.
+
+## Creating a model file
+
+### Dependencies
+
+We will need `pandas`, `numpy`, `scikit-learn` and `sklearn2pmml`.
+
+```bash
+pip install pandas numpy scikit-learn sklearn2pmml
+```
+
+#### Imports
+```python
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn2pmml import sklearn2pmml
+from sklearn2pmml.pipeline import PMMLPipeline
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+```
+
+### The model 
+
+#### Dataset
+
+For keeping things simple, let's train a linear regression model
+to match the equation, `y = 2x + 1`.
+We can generate a random dataset for this equation.
+
+```python
+X = np.random.rand(100, 1)
+Y = 2 * X + 1 + 0.1 * np.random.randn(100, 1)
+```
+
+#### Test/Train data
+
+Next, we'll divide the data into test and train datasets.
+
+```python
+df = pd.DataFrame({'X': X.flatten(), 'Y': Y.flatten()})
+train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
+X_train = train_df[['X']]
+y_train = train_df['Y']
+X_test = test_df[['X']]
+y_test = test_df['Y']
+```
+
+#### Training the model
+
+For training the model, we can get the model from scikit 
+learn library and use the dataset we generated above.
+We can also check the `mse` to get an idea of the model's accuracy.
+
+```python
+pipeline = PMMLPipeline([
+    ("regressor", LinearRegression())
+])
+
+pipeline.fit(X_train, y_train)
+
+y_pred = pipeline.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+print(f"Mean Squared Error: {mse}")
+```
+
+#### Saving the pmml file
+
+If you are satisfied by the performance of your model, you can 
+export the model as a pmml file.
+We will save the model with the name, `lr_model.pmml`
+
+```python
+sklearn2pmml(pipeline, "lr_model.pmml", with_repr = True)
+```
+
+## Using the model file  
+
+The main step of focus in this blog is using the model in C++ program.
+For this, you will need to isntall the `cPMML` library. 
+
+### Installing cPMML
+
+To install the libray in your system, you just need to run the below command.
+This will run `cmake`, so you should have `cmake` installed in your system.
+
+```bash
+git clone https://github.com/AmadeusITGroup/cPMML.git && cd cPMML && ./install.sh
+```
+
+#### For Mac M1
+
+I ran into some problems while installing this on Mac M1. 
+Here are the steps to install this effortlessly.
+
+1. Ensure you have the latest version of `cmake` installed in your system.
+2. You can edit the `install.sh` script to remove `-j 4` flag from the `cmake -j 4 ..` command. This will turn off the multi processing.
+3. The last line of the `install.sh` script is `sudo ldconfig`. Change this to `sudo update_dyld_shared_cache`. This installs the `.dylib` or `.so` library files to proper destination. 
+
+### Running the predictions 
+
+#### Include the library
+The first thing is to import the library.
+
+```cpp
+#include "cPMML.h"
+#include <iostream>
+```
+
+#### Load the model
+
+Then you can load the model.
+
+```cpp
+int main() {
+  cpmml::Model model("lr_model.pmml");
+  return 0;
+}
+```
+
+#### Start predictions
+
+The `cPMML` library takes input as an unordered_map of strings.
+For us, there is only one input which is `X`.
+
+```cpp
+int main() {
+  cpmml::Model model("lr_model.pmml");
+
+  // This shoule yield a value close to 1
+  std::unordered_map<std::string, std::string> input1 = {
+    {"X", "0"}
+  };
+
+
+  // This should yield a value close to 21
+  std::unordered_map<std::string, std::string> input2 = {
+    {"X", "10"}
+  };
+
+  std::cout<<"X = 0 Y = "<<model.predict(input1)<<'\n';
+  std::cout<<"X = 10 Y = "<<model.predict(input2)<<'\n';
+  
+  return 0;
+}
+```
+
+#### Compilation
+
+You can compile the code by including the `cPMML` library.
+
+```bash
+> g++ -std=c++11 predict.cpp -o predict.o -lcPMML
+> ./predict.o
+X = 0 Y = 0.967265
+X = 10 Y = 21.369305
+```
+
+## Conclusion
+
+In this blog, we saw how to store your model as a `PMML` file and load it in `C++` using `cPMML` library.
+You can view the code for the above [here](https://github.com/UnresolvedCold/prediction-pmml-using-cpmml-in-cpp.git).
