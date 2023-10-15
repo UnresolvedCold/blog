@@ -1,0 +1,383 @@
+---
+title: Using C++ libraries in Erlang
+description: Here,we will use NIF to call the C++ functions on Erlang side and use the cPMML library to parse the PMML files and run prediction on a linear regression model (can be used for any AI/ML model).
+ideaDate: Oct 15, 2023
+draft: true
+heroImage: /hero-images/erlang_nif.png
+keywords: erlang, c++, nif, cpmml, pmml, machine learning, ai, ml, linear regression
+---
+
+## Introduction
+
+Erlang is a great language for building concurrent systems that are fault-tolerant and scalable.
+But it lacks some of the libraries that are available in other languages.
+One such example is using `PMML` files for machine learning models.
+At the time of writing, Erlang doesn't have a library for parsing `PMML` files.
+This is a problem for people who want to use Erlang for building machine learning systems.
+Here I'll show how to use `C++` to build a `NIF` that can be used in Erlang to parse `PMML` files.
+More specifically, I'll use the [cPMML](https://github.com/AmadeusITGroup/cPMML) library to build a `NIF` that can be used in Erlang.
+
+## Erlang NIF
+
+Erlang NIF provides you a way to define your functions in `C/C++` and call them in `Erlang` code natively.
+The `C/C++` program is compiled to generate a library file that can be used in Erlang.
+This library is dynamically linked to the Erlang VM and is the fastest way of calling the `C/C++` code from `Erlang`.
+The disadvantage of the approach is that if the `C/C++` code crashes, it will crash the Erlang VM.
+And you will need to maintain the `C/C++` code along with the `Erlang` code.
+
+## Prerequisites
+
+`cPMML` library requires a version of `C++` that supports `C++11` standard.
+Also, make sure you have the required header files on the `Erlang` side.
+
+You can find them on Mac OS or Linux using the find function.
+If the header files are located in multiple locations, use the `Celler` one.
+
+```bash
+find / -name erl_nif.h | grep erl_nif.h
+```
+
+## Hello Nif program
+
+### C/C++ code
+
+#### Header file
+
+You need to include the below header file to use the `Erlang` functionalities.
+On a lower level, it defines the data structures and environment that `Erlang` provides to the `C/C++` code.
+
+```cpp
+#include <erl_nif.h>
+```
+
+#### Function Definition
+
+These functions are called from `Erlang` code. 
+They must follow a specific structure and return a specific type of value.
+Here, we will define a function that will return a "Hello, World!" string.
+
+`ERL_NIF_TERM` is the return type of the function. 
+It is an interface for various return types like `binary`, `tuple`, `list`, `atom`, etc.
+Meaning, that you can return any of these types from the function.
+
+`ErlNifEnv` is the pointer to the Erlang environment.
+It provides you access to various `Erlang` functionalities like memory management, exception handling and `Erlang` term creation.
+For us, it will help in creating Erlang Terms like `string`.
+`enif_make_string` is the function that will create a string from the `C/C++` code.
+
+The `argc` and `argv` provide the number of arguments and the arguments passed to the function from `Erlang` code.
+
+Below is the function definition for `hello world`.
+
+```cpp
+static ERL_NIF_TERM hello_world(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    return enif_make_string(env, "Hello, World!", ERL_NIF_LATIN1);
+}
+```
+
+#### Export functions
+
+You need to specify the functions that you want to export to the `Erlang` code.
+The structure is a list of `ErlNifFunc` objects.
+Each object has the name of the function that Erlang sees, the number of arguments and the function pointer.
+
+```cpp
+static ErlNifFunc nif_funcs[] = {
+    {"hello_world", 0, hello_world}
+};
+
+```
+
+To initialize the `NIF` library, you need to call the `ERL_NIF_INIT` function.
+This takes in the name of your `Erlang` module and the exported functions.
+
+Let's call our `Erlang` module `hello_nif`.
+
+```cpp
+ERL_NIF_INIT(hello_nif, nif_funcs, NULL, NULL, NULL, NULL)
+```
+
+#### Final code
+
+```cpp
+extern "C" {
+  #include <erl_nif.h>
+  static ERL_NIF_TERM hello_world(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+      return enif_make_string(env, "Hello, World!", ERL_NIF_LATIN1);
+  }
+  static ErlNifFunc nif_funcs[] = {
+      {"hello_world", 0, hello_world}
+  };
+}
+
+ERL_NIF_INIT(hello_nif, nif_funcs, NULL, NULL, NULL, NULL);
+```
+
+### Erlang code
+
+#### Erlang module
+We will name our `Erlang` module `hello_nif.erl`.
+
+```erlang
+-module(hello_nif).
+```
+
+#### Define your NIF functions
+
+This specifies the functions that are exported from the `C/C++` code.
+
+```erlang
+-export([hello_world/0]).
+-nifs([hello_world/0]).
+```
+
+#### Load the library on module load
+
+If you compiled your `C/C++` code to a library named `hello_nif.so`, you can load it using the `load_nif` function.
+
+```erlang
+-on_load(init/0).
+
+init() ->
+    ok = erlang:load_nif("./hello_nif", 0).
+```
+
+#### Fallback function
+
+The `C/C++` code can crash and you need to handle that in the `Erlang` code.
+These functions will run when the `C/C++` code crashes.
+You should name each of these functions with the same name in the `C/C++` code.
+
+```erlang
+hello_world() ->
+    exit(nif_library_not_loaded).
+```
+
+#### Final code
+
+```erlang
+-module(hello_nif).
+-nifs([hello_world/0]).
+-on_load(init/0).
+
+init() ->
+    ok = erlang:load_nif("./hello_nif", 0).
+
+hello_world() ->
+    exit(nif_library_not_loaded).
+```
+
+### Compiling and Running
+
+To compile the `C/C++` code you can use `gcc`.
+
+#### Mac OS
+```bash
+gcc -o hello_nif.so hello.c -I /usr/local/lib/erlang/erts-13.2.2.2/include/ -bundle -bundle_loader /usr/local/lib/erlang/erts-13.2.2.2/bin/beam.smp
+```
+
+#### Linux
+```bash
+gcc -o hello_nif.so hello.c -I /usr/lib/erlang/erts-13.2.2.2/include -shared -fpic
+```
+
+On Erlng, you can call the `hello_world` function.
+
+```bash
+> c(hello_nif).
+> hello_nif:hello_world().
+"Hello, World!"
+```
+
+## cPMML NIF
+
+We saw how to create a simple `NIF` that returns a string.
+Now, let's create a `NIF` that can take input and run prediction using a `PMML` model file.
+For this, we will use the same model file we created in the [previous post](/blog/2023-10-02-cpmml-predictions).
+
+We have a PMML model for linear regression, `y = 2x + 1` and we want to predict the value of `y` for a given value of `x`.
+Keeping it short, we will expose a function called, `predict` that will take the input and return the output.
+
+### C/C++ code
+
+Assuming you can compile `cPMML` files as described in the [previous post](/blog/2023-10-02-cpmml-predictions).
+
+#### Header files
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include "cPMML.h"
+
+using namespace std;
+```
+
+#### PMML Parser class
+
+We want to load the model once and use it for multiple predictions.
+For this, let's create a class that will load the model and call predictions on it.
+We will maintain only one instance of this class and use it for all the predictions.
+
+```cpp
+class PmmlModelParser {
+private:
+  cpmml::Model model;
+
+public:
+    PmmlModelParser(const string& modelname) {
+        model = cpmml::Model(modelname);
+    }
+
+    string predict(const unordered_map<string, string>& x_input) {
+        return model.predict(x_input);
+    }
+};
+
+// Global variable
+PmmlModelParser *pmmlModelParser = nullptr;
+
+```
+
+#### NIF implementation
+
+We will create two functions, `init` and `predict`.
+The `init` function will take the `PMML` file as input and load it.
+The `predict` function will take the input and return the output.
+
+The below code describes the structure of the `NIF` functions.
+
+```cpp
+extern "C" {
+    #include <erl_nif.h>
+    
+    static ERL_NIF_TERM init(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {}
+
+    static ERL_NIF_TERM predict(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {}
+
+    static ErlNifFunc nif_funcs[] = {
+        {"init", 1, init},
+        {"evaluate", 1, predict}
+    };
+}
+
+ERL_NIF_INIT(lr_model, nif_funcs, NULL, NULL, NULL, NULL)
+
+```
+
+#### init function
+
+The `init` function will take the `PMML` file as input and load it.
+We will use the `enif_inspect_binary` function to get the `PMML` file as a binary.
+Then we will convert it to a string and pass it to the `PmmlModelParser` class.
+
+```cpp
+static ERL_NIF_TERM init(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    ErlNifBinary input_bin;
+    if (!enif_inspect_binary(env, argv[0], &input_bin)) {
+        return enif_make_badarg(env);
+    }
+    string input(reinterpret_cast<char*>(input_bin.data), input_bin.size);
+    pmmlModelParser = new PmmlModelParser(input);
+    return enif_make_atom(env, "ok");
+}
+```
+
+#### predict function
+
+The `predict` function will take the input and return the output.
+The input will be a string and the output will be a string on the Erlang side.
+
+But on the `C/C++` side, we will convert the input to a map and pass it to the `PmmlModelParser` class because `cPMML` library expects a map as input.
+Don't get intimidated by the code below, it's just converting the `Erlang` map to a `C++` map by iterating over all the keys and value pairs.
+
+For prediction, we will need a map with the key as `X` and value as the input.
+
+> I could have just used a binary input as X and converted it to a string on the `C/C++` side. But, to make this more general, I am converting the `Erlang` map to a `C++` map. Now this can be used for any PMML file and not just a specific one.
+
+```cpp
+static ERL_NIF_TERM predict(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+  unordered_map<std::string, std::string> cpp_map;
+
+  if (!enif_is_map(env, argv[0]))
+  {
+    return enif_make_badarg(env);
+  }
+
+  ErlNifMapIterator iter;
+  if (enif_map_iterator_create(env, argv[0], &iter, ERL_NIF_MAP_ITERATOR_FIRST))
+  {
+    do
+    {
+      ERL_NIF_TERM key, value;
+      if (enif_map_iterator_get_pair(env, &iter, &key, &value))
+      {
+        ErlNifBinary key_bin, value_bin;
+        if (enif_map_iterator_get_pair(env, &iter, &key, &value))
+        {
+          char key_str[64], value_str[64];
+          if (enif_get_string(env, key, key_str, sizeof(key_str), ERL_NIF_LATIN1) &&
+              enif_get_string(env, value, value_str, sizeof(value_str), ERL_NIF_LATIN1))
+          {
+            cpp_map[key_str] = value_str;
+          }
+        }
+      }
+    } while (enif_map_iterator_next(env, &iter));
+    enif_map_iterator_destroy(env, &iter);
+  }
+
+  string ret = pmmlModelParser->predict(cpp_map);
+  return enif_make_string(env, ret.c_str(), ERL_NIF_LATIN1);
+}
+```
+
+### Erlang code
+
+We will name our `Erlang` module `lr_model.erl`.
+
+```erlang
+-module(lr_model).
+-export([init/1, evaluate/1]).
+-nifs([init/1, evaluate/1]).
+-on_load(init/0).
+
+init() ->
+    ok = erlang:load_nif("./lr_model", 0).
+
+init(PmmlFile) ->
+    exit(problem_loading_nif).
+
+evaluate(Input) ->
+    exit(problem_loading_nif).
+```
+
+### Compiling and Running
+
+Compiling the `C/C++` code will now take an extra parameter to include `cPMML` library.
+As the model is predicting the values for `y = 2x + 1`, we should get `~3` for `x = 1` and `~1` for `x = 0`.
+
+```bash
+g++ -std=c++11 library.cpp \
+-o lr_model.so \
+-lcPMML \
+-I /usr/local/lib/erlang/erts-13.2.2.2/include/ \
+-bundle \
+-bundle_loader /usr/local/lib/erlang/erts-13.2.2.2/bin/beam.smp
+```
+
+```bash
+> c(lr_model).
+> lr_model:init(<<"./lr_model.pmml">>).
+> lr_model:evaluate(#{"X"=>"0"}).
+"0.967265"
+> lr_model:evaluate(#{"X"=>"1"}).
+"3.007469"
+```
+
+## Conclusion
+
+In this blog, we saw how to use `C/C++` libraries in `Erlang` code.
+We used a PMML file of a linear regression model to predict the values of `y = 2x + 1` for a given value of `x` in `Erlang` where the code was implemented in C++.
+We saw how to use the `cPMML` library to parse the `PMML` file and use it for predictions.
