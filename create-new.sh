@@ -7,16 +7,18 @@ git fetch origin
 git checkout publish
 git pull origin publish
 git checkout -b blog-$name
-new_file="src/content/blog/$file_date-$name.mdx"
-mkdir -p src/images/posts/$year/$name
+new_file="org/$file_date-$name.org"
+mkdir -p org/images
 
-echo "---" > $new_file
-echo "title: $name" >> $new_file
-echo "description: $name" >> $new_file
-echo "ideaDate: $date" >> $new_file
-echo "draft: true" >> $new_file
-echo "heroImage: /hero-images/default.png" >> $new_file
-echo "---" >> $new_file
+echo "#+title: $name" > $new_file
+echo "#+AUTHOR: John Doe" >> $new_file
+echo "#+DATE: $file_date" >> $new_file
+echo "#+PROPERTY: description: $name" >> $new_file
+echo "#+PROPERTY: draft: true" >> $new_file
+echo "#+PROPERTY: heroImage: /hero-images/default.png" >> $new_file
+echo "#+PROPERTY: ideaDate: $date" >> $new_file
+echo "" >> $new_file
+echo "* Introduction" >> $new_file
 
 # Result
 echo "Starter file generated!"
