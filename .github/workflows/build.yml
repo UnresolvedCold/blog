@@ -39,9 +39,6 @@ jobs:
         id: org-to-mdx
         run: |
           python3 org-to-mdx.py
-      - name: Remove org files
-        run: |
-          rm -rf org
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v37
@@ -91,6 +88,13 @@ jobs:
       run: |
         git checkout ${{ inputs.branch }} 
         git branch 
+    - name: Org to MDX
+      id: org-to-mdx
+      run: |
+        python3 org-to-mdx.py
+    - name: Remove org files
+      run: |
+        rm -rf org
     - name: Use Node.js 16
       uses: actions/setup-node@v3
       with:
