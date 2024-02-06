@@ -55,7 +55,7 @@ To use it with current buffer, you can simply call this function and enter your 
 The output will be shown on a new buffer with name *JMESPath Result*.
 
 To use this with a different file, you can set the ~Universal Argument~ using ~C-u~ or ~SPC-u~ (using evil).
-Then you can enter the file execute the query on.
+Then you can enter the file to execute the query on.
 
 * Read more
 

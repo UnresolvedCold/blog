@@ -90,6 +90,8 @@ def convert_org_to_mdx(org_content, year, blog_name, org_folder="org"):
         # images, contains .png, .jpg, .jpeg, .gif
         elif re.search(r'\[\[([^\]]+)\]\]', org_line):
             md_content += re.sub(r'\[\[([^\]]+)\]\]', replace_image, org_line) + "\n"
+        elif re.search(r'.*\[\[(.*?)\]\[(.*?)\]\].*', org_line):
+            md_content += re.sub(r"\[\[(.*?)\]\[(.*?)\]\]", lambda x: "[" + x.group(2) + "](" + x.group(1) + ")", org_line)
         # Normal line    
         else:
             # Bold
@@ -98,10 +100,10 @@ def convert_org_to_mdx(org_content, year, blog_name, org_folder="org"):
             org_line = re.sub(r"/(.*?)/", lambda x: "*" + x.group(1) + "*", org_line)
             # Underline
             org_line = re.sub(r"_(.*?)_", lambda x: "<u>" + x.group(1) + "</u>", org_line)
-            # Strikethrough
-            org_line = re.sub(r"~(.*?)~", lambda x: "~~" + x.group(1) + "~~", org_line)
+            # Inline code block
+            org_line = re.sub(r"~(.*?)~", lambda x: "`" + x.group(1) + "`", org_line)
             # Link
-            org_line = re.sub(r"\[\[(.*?)\]\[(.*?)\]\]", lambda x: "[" + x.group(2) + "](" + x.group(1) + ")", org_line)
+            # org_line = re.sub(r"\[\[(.*?)\]\[(.*?)\]\]", lambda x: "[" + x.group(2) + "](" + x.group(1) + ")", org_line)
             # Table
             org_line = re.sub(r"\|", lambda x: " | ", org_line)
             # Checkbox
