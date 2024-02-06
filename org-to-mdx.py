@@ -66,7 +66,10 @@ def convert_org_to_mdx(org_content, year, blog_name, org_folder="org"):
 
         # Convert code block to md code block
         elif org_line.startswith("#+BEGIN_SRC") or org_line.startswith("#+begin_src"):
-            md_content += "```" + org_line.split(" ")[1].split(" ")[0] + "\n"
+            if len(org_line.split(" ")) == 1:
+                md_content += "```" + "\n"
+            if len(org_line.split(" ")) > 1:
+                md_content += "```" + org_line.split(" ")[1].split(" ")[0] + "\n"
             in_code_block = True
         elif org_line.startswith("#+END_SRC") or org_line.startswith("#+end_src"):
             md_content += "```\n"
