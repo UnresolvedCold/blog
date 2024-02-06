@@ -137,6 +137,8 @@ def convert_org_files_to_mdx(org_folder, mdx_folder):
 if __name__ == "__main__":
     org_file_path = "org"
     mdx_file_path = "src/content/blog/"
-
-    convert_org_files_to_mdx(org_file_path, mdx_file_path)
-    print(f"Conversion complete. MDX file saved at: {mdx_file_path}")
+    if os.path.exists(org_file_path):
+        convert_org_files_to_mdx(org_file_path, mdx_file_path)
+        print(f"Conversion complete. MDX file saved at: {mdx_file_path}")
+    else:
+        print(f"Org directory does not exist, skipping.")
