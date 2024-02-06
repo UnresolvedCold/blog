@@ -13,16 +13,15 @@ on:
         type: boolean
         default: false
         description: If true will run the build and create the artifacts
-      branch: 
+      branch:
         required: false
         type: string
         description: if provided will checkout this branch for all the process
 
-
 jobs:
-  evaluate-changes: 
+  evaluate-changes:
     runs-on: ubuntu-latest
-    outputs: 
+    outputs:
       new-blogs: ${{ steps.new-blogs.outputs.newblogs }}
       raw-new-blogs: ${{ steps.new-blogs.outputs.rawnewblogs }}
       enable-deploy: ${{ steps.enable-deploy.outputs.any_changed }}
@@ -34,7 +33,7 @@ jobs:
         if: inputs.branch
         run: |
           git checkout ${{ inputs.branch }} 
-          git branch   
+          git branch
       - name: Org to MDX
         id: org-to-mdx
         run: |
@@ -80,65 +79,62 @@ jobs:
     needs: evaluate-changes
     if: (needs.evaluate-changes.outputs.enable-deploy == 'true' || inputs.force_build) && always()
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Checkout input branch  - ${{ inputs.branch }}
-      if: inputs.branch
-      run: |
-        git checkout ${{ inputs.branch }} 
-        git branch 
-    - name: Org to MDX
-      id: org-to-mdx
-      run: |
-        python3 org-to-mdx.py
-    - name: Remove org files
-      run: |
-        rm -rf org
-    - name: Use Node.js 16
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16
-        cache: 'npm'
-    - run: npm ci
-    - name: Update pubDate
-      run: |
-        # Add pubDate after ideaDate to blog
-        for file in ${{ needs.evaluate-changes.outputs.raw-new-blogs }}; do
-          sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" ./$file
-        done
-        sleep 5
-        git status
-    - name: Commit changes to publish branch
-      if: |
-        inputs.deploy_site
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: Processed Publish [skip ci]
-        branch: publish
-        file_pattern: 'src/content/blog/**.mdx org/*'
-        commit_user_name: Publish Bot
-    - run: |
-        rm -rf dist
-        npm run build --if-present
-    - name: Archive Dist
-      uses: actions/upload-artifact@v3
-      with:
-        name: dist
-        path: dist
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Checkout input branch  - ${{ inputs.branch }}
+        if: inputs.branch
+        run: |
+          git checkout ${{ inputs.branch }}
+          git branch
+      - name: Org to MDX
+        id: org-to-mdx
+        run: |
+          python3 org-to-mdx.py
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+      - run: npm ci
+      - name: Update pubDate
+        run: |
+          # Add pubDate after ideaDate to blog
+          for file in ${{ needs.evaluate-changes.outputs.raw-new-blogs }}; do
+            sed -i "/^ideaDate:.*/a pubDate: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" ./$file
+          done
+          sleep 5
+          git status
+      - name: Commit changes to publish branch
+        if: |
+          inputs.deploy_site
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Processed Publish [skip ci]
+          branch: publish
+          file_pattern: "src/content/blog/**.mdx org/*"
+          commit_user_name: Publish Bot
+      - run: |
+          rm -rf dist
+          npm run build --if-present
+      - name: Archive Dist
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
   deploy:
     name: Deploy
-    needs: build 
+    needs: build
     runs-on: ubuntu-latest
-    if: | 
-      inputs.deploy_site 
+    if: |
+      inputs.deploy_site
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - run: |
           git checkout ${{ inputs.branch }} 
-          git branch 
+          git branch
       - name: Download Dist
         uses: actions/download-artifact@v3
         with:
@@ -152,10 +148,10 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
   publish-social:
     needs: [evaluate-changes, deploy]
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     if: needs.evaluate-changes.outputs.new-blogs != '[]'
-    strategy: 
-      matrix: 
+    strategy:
+      matrix:
         blog: ${{ fromJson(needs.evaluate-changes.outputs.new-blogs) }}
     steps:
       - name: Notify on Telegram
@@ -167,4 +163,3 @@ jobs:
             Checkout my new blog post !!!
 
             ${{ matrix.blog }}
-                    
