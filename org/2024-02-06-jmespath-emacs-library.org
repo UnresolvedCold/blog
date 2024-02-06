@@ -1,0 +1,9 @@
+#+title: Using Jmespath in Emacs
+#+AUTHOR: Shubham Kumar
+#+DATE: 2024-02-06
+#+PROPERTY: description: Querying JSON files using Jmespath library in Emacs
+#+PROPERTY: draft: true
+#+PROPERTY: heroImage: /hero-images/default.png
+#+PROPERTY: ideaDate: Feb 06, 2024
+
+* Introduction
