@@ -61,6 +61,7 @@ jobs:
             .github/*
             .vscode/*
             **/*.sh
+            org/**
       - name: List of new blogs
         id: new-blogs
         run: |
@@ -78,6 +79,7 @@ jobs:
           # rawnewblogs=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${rawnewblogs[@]}")
           echo "newblogs=${newblogs}"
           echo "rawnewblogs=${rawnewblogs}"
+          echo "Will be deployed: ${{ steps.enable-deploy.outputs.any_changed }}"
           echo "newblogs=${newblogs}" >> $GITHUB_OUTPUT
           echo "rawnewblogs=${rawnewblogs[@]}" >> $GITHUB_OUTPUT
   build:
