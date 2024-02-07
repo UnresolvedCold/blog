@@ -1,0 +1,64 @@
+---
+title: Using Jmespath in Emacs
+AUTHOR: Shubham Kumar
+DATE: 2024-02-06
+description: Querying JSON files/data using Jmespath library in Emacs
+draft: false
+heroImage: /hero-images/default.png
+ideaDate: Feb 06, 2024
+---
+
+
+## Introduction
+
+When you have a small JSON file, it is quite easy to look for what you want.
+But querying a large JSON data is very troublesome.
+
+This is where people use tools like Jmespath to filter and transform data into their liking.
+This post is about a small wrapper over `jp` CLI utility that you can use while working on JSON files in Emacs.
+
+## Installing JP
+
+### Linux
+
+On Linux, you can install the utility by first downloding the binary and then installing it.
+```bash
+> sudo wget https://github.com/jmespath/jp/releases/latest/download/jp-linux-amd64 \
+>   -O /usr/local/bin/jp  && sudo chmod +x /usr/local/bin/jp
+```
+
+### Mac
+On Mac, you can install Jmespath CLI using `brew`.
+```bash
+> brew install jmespath/jmespath/jp
+```
+
+## Adding Jmespath recipe in Emacs
+
+This is my first recipe that I published on [MELPA](https://melpa.org/).Here are the steps to install it in `Doom` using `straight`.
+You can use any package manager to install it using `MELPA` repository.
+
+### Doom Emacs
+
+1. On Doom, you can just mention the below recipe in your `package.el`.
+```elisp
+> (package! jmespath)
+```
+
+2. Also, add the below line in your `config.el`.
+```elisp
+> (use-package jmespath)
+```
+
+## Using Jmespath
+
+There is an interactive function, `jmespath-query-and-show` that you can use to query the currently opened buffer or a file.
+To use it with current buffer, you can simply call this function and enter your query.
+The output will be shown on a new buffer with name **JMESPath Result**.
+
+To use this with a different file, you can set the `Universal Argument` using `C-u` or `SPC-u` (using evil).
+Then you can enter the file to execute the query on.
+
+## Read more
+
+To learn more about JMESPath, visit [Jamespath page](https://jmespath.org/).
