@@ -38,6 +38,10 @@ jobs:
         id: org-to-mdx
         run: |
           python3 org-to-mdx.py
+          git config --global user.email "github_action@trigger.xyz"
+          git config --global user.name "GitHub Action"
+          git add .
+          git commit -m "Convert org to mdx"
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v37
@@ -112,7 +116,7 @@ jobs:
         with:
           commit_message: Processed Publish [skip ci]
           branch: publish
-          file_pattern: "src/content/blog/**.mdx org/*"
+          file_pattern: "src/content/blog/**.mdx org/**"
           commit_user_name: Publish Bot
       - run: |
           rm -rf dist
