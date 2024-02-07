@@ -42,7 +42,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: ORG to MDX [skip ci]
-          file_pattern: "org/**"
+          file_pattern: "src/content/blog/**.mdx"
           commit_user_name: ORGTOMDX Bot
       - name: Get changed files
         id: changed-files
