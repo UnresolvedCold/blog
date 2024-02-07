@@ -2,7 +2,7 @@
 #+AUTHOR: Shubham Kumar
 #+DATE: 2024-02-06
 #+PROPERTY: description: Querying JSON files/data using Jmespath library in Emacs
-#+PROPERTY: draft: true
+#+PROPERTY: draft: false
 #+PROPERTY: heroImage: /hero-images/default.png
 #+PROPERTY: ideaDate: Feb 06, 2024
 
