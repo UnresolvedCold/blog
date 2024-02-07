@@ -66,7 +66,10 @@ def convert_org_to_mdx(org_content, year, blog_name, org_folder="org"):
 
         # Convert code block to md code block
         elif org_line.startswith("#+BEGIN_SRC") or org_line.startswith("#+begin_src"):
-            md_content += "```" + org_line.split(" ")[1].split(" ")[0] + "\n"
+            if len(org_line.split(" ")) == 1:
+                md_content += "```" + "\n"
+            if len(org_line.split(" ")) > 1:
+                md_content += "```" + org_line.split(" ")[1].split(" ")[0] + "\n"
             in_code_block = True
         elif org_line.startswith("#+END_SRC") or org_line.startswith("#+end_src"):
             md_content += "```\n"
@@ -87,6 +90,8 @@ def convert_org_to_mdx(org_content, year, blog_name, org_folder="org"):
         # images, contains .png, .jpg, .jpeg, .gif
         elif re.search(r'\[\[([^\]]+)\]\]', org_line):
             md_content += re.sub(r'\[\[([^\]]+)\]\]', replace_image, org_line) + "\n"
+        elif re.search(r'.*\[\[(.*?)\]\[(.*?)\]\].*', org_line):
+            md_content += re.sub(r"\[\[(.*?)\]\[(.*?)\]\]", lambda x: "[" + x.group(2) + "](" + x.group(1) + ")", org_line)
         # Normal line    
         else:
             # Bold
@@ -95,10 +100,10 @@ def convert_org_to_mdx(org_content, year, blog_name, org_folder="org"):
             org_line = re.sub(r"/(.*?)/", lambda x: "*" + x.group(1) + "*", org_line)
             # Underline
             org_line = re.sub(r"_(.*?)_", lambda x: "<u>" + x.group(1) + "</u>", org_line)
-            # Strikethrough
-            org_line = re.sub(r"~(.*?)~", lambda x: "~~" + x.group(1) + "~~", org_line)
+            # Inline code block
+            org_line = re.sub(r"~(.*?)~", lambda x: "`" + x.group(1) + "`", org_line)
             # Link
-            org_line = re.sub(r"\[\[(.*?)\]\[(.*?)\]\]", lambda x: "[" + x.group(2) + "](" + x.group(1) + ")", org_line)
+            # org_line = re.sub(r"\[\[(.*?)\]\[(.*?)\]\]", lambda x: "[" + x.group(2) + "](" + x.group(1) + ")", org_line)
             # Table
             org_line = re.sub(r"\|", lambda x: " | ", org_line)
             # Checkbox
