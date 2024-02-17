@@ -15,7 +15,8 @@ echo "#+AUTHOR: John Doe" >> $new_file
 echo "#+DATE: $file_date" >> $new_file
 echo "#+PROPERTY: description: $name" >> $new_file
 echo "#+PROPERTY: draft: true" >> $new_file
-echo "#+PROPERTY: heroImage: /hero-images/default.png" >> $new_file
+# Enable this to get a hero image
+# echo "#+PROPERTY: heroImage: /hero-images/default.png" >> $new_file
 echo "#+PROPERTY: ideaDate: $date" >> $new_file
 echo "" >> $new_file
 echo "* Introduction" >> $new_file

@@ -9,7 +9,7 @@ const posts = (await getCollection("blog")).sort((a, b) => {
   return b_date.valueOf() - a_date.valueOf()
 });
 
-const last_posts = posts.slice(0, 3);
+const last_posts = posts.slice(0, 5);
 ---
 
 <BaseLayout sideBarActiveItemID="home">
@@ -29,7 +29,7 @@ const last_posts = posts.slice(0, 3);
     </div>
   </div>
 
-  <div class="text-3xl font-bold">My recent posts, </div>
+  <div class="text-3xl font-bold">My recent posts </div>
   {
     last_posts.map((post) => (
       <>
