@@ -38,11 +38,14 @@ The main question is how can we write an algorithm to sort these non-associative
 
 Let's try to solve this using ~Java~ with a custom comparator.
 This ~Collections.sort~ method uses a modified version of Merge sort called Tim sort.
-For this article you don't need to learn Tim Sort.
-A basic understanding of Merge sort is enough as I will be explicitly using merge sort.
+Understanding why this fails for merge sort will give us an insight why it fails for other algorithms also.
 But if you want to learn more about Tim Sort refer -- https://www.geeksforgeeks.org/timsort/
 
-** The code (wrong)
+** Merge sort code
+
+Merge sort consists of 3 things - divide, compare and merge.
+It just says, divide the array in 2 halves and merge them in order.
+Dividing the array takes ~O(nlogn)~ while merging is an ~O(n)~ operation.
 
 Let's implement the mergesort and merge logic as follows.
 ~mergeSort~ function divides the array in 2 parts and sorts both and merge them.
@@ -127,7 +130,9 @@ public class NonAssociativeSort
 : [[0, 0], [0, 0], [0, 1]]
 : [[0, 0], [0, 0], [0, 1]]
 
-But this is the wrong sorted order.
+** The Problem
+
+
 
 ** Explanation
 
