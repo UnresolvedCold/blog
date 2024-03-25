@@ -72,11 +72,11 @@ public static <T> void mergeSort(List<T> arr, Comparator<? super T> cmp) {
         return;
     }
     int mid = arr.size() / 2;
-    List<T> left = arr.subList(0, mid);
-    List<T> right = arr.subList(mid, arr.size());
+    List<T> left = new ArrayList(arr.subList(0, mid));
+    List<T> right = new ArrayList(arr.subList(mid, arr.size()));
     mergeSort(left, cmp);
     mergeSort(right, cmp);
-    merge(new ArrayList(arr), left, right, cmp);
+    merge(arr, left, right, cmp);
     System.out.println("Out: "+arr);
 }
 
@@ -90,8 +90,8 @@ private static <T> void merge(List<T> result, List<T> left, List<T> right, Compa
             System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+left.get(i));
             result.set(k++, left.get(i++));
         } else {
-            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+right.get(j));
-            result.set(k++, right.get(j++));
+            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+left.get(i));
+            result.set(k++, left.get(i++));
         }
     }
     while (i < left.size()) {
@@ -149,12 +149,12 @@ In: [[0, 0]]
 [0, 0] < [1, 1]
 Compare: [1, 1],[0, 0] :Choose [0, 0]
 Rest of the left: [1, 1]
-Out: [[1, 1], [0, 0]]
-Compare: [0, 1],[1, 1] :Choose [1, 1]
-Compare: [0, 1],[0, 0] :Choose [0, 0]
-Rest of the left: [0, 1]
-Out: [[0, 1], [1, 1], [0, 0]]
-final:[[0, 1], [1, 1], [0, 0]]
+Out: [[0, 0], [1, 1]]
+Compare: [0, 1],[0, 0] :Choose [0, 1]
+Rest of the right: [0, 0]
+Rest of the right: [1, 1]
+Out: [[0, 1], [0, 0], [1, 1]]
+final:[[0, 1], [0, 0], [1, 1]]
 #+end_example
 
 ** Explanation
