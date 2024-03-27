@@ -31,6 +31,7 @@ Is any element of c < smallest element of b -> NO.
 So b == c? Yes
 
 You can view the whole table of comparison.
+
 | ele1     | ele2     | min(ele1) | max(ele1) | compare (ele1, ele2) | Comments      |
 |----------+----------+-----------+-----------+----------------------+---------------|
 | a (0, 0) | a (0, 0) |         0 |         0 | a == a               |               |
@@ -39,8 +40,8 @@ You can view the whole table of comparison.
 | b (0, 1) | a (0, 0) |         0 |         1 | b == a               |               |
 | b (0, 1) | b (0, 1) |         0 |         1 | b == b               |               |
 | b (0, 1) | c (1, 1) |         0 |         1 | b == c               |               |
-| c (1, 1) | a (0, 0) |         1 |         1 | c > a                | 0 < min(ele1)  |
-| c (1, 1) | b (0, 1) |         1 |         1 | c > b                | 0 < min(ele1)  |
+| c (1, 1) | a (0, 0) |         1 |         1 | c > a                | 0 < min(ele1) |
+| c (1, 1) | b (0, 1) |         1 |         1 | c > b                | 0 < min(ele1) |
 | c (1, 1) | c (1, 1) |         1 |         1 | c == c               |               |
 
 This is what we call non-associativity and non-commutativity.
@@ -49,118 +50,30 @@ The main question is how can we write an algorithm to sort these non-associative
 
 * Why merge sort fails here?
 
-Let's try to solve this using ~Java~ with a custom comparator.
-This ~Collections.sort~ method uses a modified version of Merge sort called Tim sort.
-Understanding why this fails for merge sort will give us an insight why it fails for other algorithms also.
-But if you want to learn more about Tim Sort refer -- https://www.geeksforgeeks.org/timsort/
+The merge sort algorithm breaks the problem in 2 and tries to solve it until the problem is unbreakable.
+When the problem is unbreakable it just merges the 2 parts.
 
-** Merge sort code
+Let's take the example with a=(0,0), b=(0,1) and c=(1,1).
+And let's say their initial arrangemet is ~b, c, a~.
+As per our above analysis, we know the sorted arrangement should be ~a, b, c~.
 
-Merge sort consists of 3 things - divide, compare and merge.
-It just says, divide the array in 2 halves and merge them in order.
-Dividing the array takes ~O(nlogn)~ while merging is an ~O(n)~ operation.
+Let's analyze, why merge sort will fail.
 
-Let's implement the mergesort and merge logic as follows.
-~mergeSort~ function divides the array in 2 parts and sorts both and merge them.
-~merge~ function is just comparing the elememts of both the arrays and creating a result based on that.
+The merge sort will follow the follwing steps.
+1. Break ~bca~ into 2 parts, ~b~ and ~ca~
+2. Break ~ca~ into two parts ~c~ and ~a~
+3. ~c~ and ~a~ connot be broken further
+4. Compare ~c~ and ~a~. ~c > a~
+5. Merge them in sorted array as ~ac~
+6. Compare ~b~ and ~a~. ~b == a~
+7. Choose ~b~ and then the array ~ac~
+8. Merge them to get ~bac~
 
-#+NAME: MERGE_SORT_IMPLEMENTATION
-#+begin_src java :noeval
-public static <T> void mergeSort(List<T> arr, Comparator<? super T> cmp) {
-    System.out.println("In: "+arr);
-    if (arr.size() < 2) {
-        return;
-    }
-    int mid = arr.size() / 2;
-    List<T> left = new ArrayList(arr.subList(0, mid));
-    List<T> right = new ArrayList(arr.subList(mid, arr.size()));
-    mergeSort(left, cmp);
-    mergeSort(right, cmp);
-    merge(arr, left, right, cmp);
-    System.out.println("Out: "+arr);
-}
-
-private static <T> void merge(List<T> result, List<T> left, List<T> right, Comparator<? super T> cmp) {
-    int i = 0, j = 0, k = 0;
-    while (i < left.size() && j < right.size()) {
-        if (cmp.compare(left.get(i), right.get(j)) > 0) {
-            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+right.get(j));
-            result.set(k++, right.get(j++));
-        } else if (cmp.compare(left.get(i), right.get(j)) < 0){
-            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+left.get(i));
-            result.set(k++, left.get(i++));
-        } else {
-            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+left.get(i));
-            result.set(k++, left.get(i++));
-        }
-    }
-    while (i < left.size()) {
-        System.out.println("Rest of the left: "+left.get(i));
-        result.set(k++, left.get(i++));
-    }
-    while (j < right.size()) {
-        System.out.println("Rest of the right: "+right.get(j));
-        result.set(k++, right.get(j++));
-    }
-}
-#+end_src
-
-#+begin_src java :noweb yes
-import java.util.*;
-
-public class NonAssociativeSort
-{
-<<MERGE_SORT_IMPLEMENTATION>>
-
-  public static void main(String [] args) {
-    // List of elements
-    List<List<Integer>> arr = new ArrayList<>();
-    arr.add(List.of(0,1));
-    arr.add(List.of(1,1));
-    arr.add(List.of(0,0));
-
-    // Logic fpr comparison
-    mergeSort(arr, (a, b) -> {
-      for (int e : b) {
-        if (e > a.get(a.size()-1)){
-          System.out.println(b + " > " + a);
-          return -1;
-        }
-        else if (e < a.get(0)){
-          System.out.println(b + " < " + a);
-          return 1;
-        }
-      }
-      return 0;
-    });
-
-    System.out.println("final:" + arr);
-  }
-}
-#+end_src
-
-#+RESULTS:
-#+begin_example
-In: [[0, 1], [1, 1], [0, 0]]
-In: [[0, 1]]
-In: [[1, 1], [0, 0]]
-In: [[1, 1]]
-In: [[0, 0]]
-[0, 0] < [1, 1]
-Compare: [1, 1],[0, 0] :Choose [0, 0]
-Rest of the left: [1, 1]
-Out: [[0, 0], [1, 1]]
-Compare: [0, 1],[0, 0] :Choose [0, 1]
-Rest of the right: [0, 0]
-Rest of the right: [1, 1]
-Out: [[0, 1], [0, 0], [1, 1]]
-final:[[0, 1], [0, 0], [1, 1]]
-#+end_example
-
-** Explanation
-
-The ~Merge~ sort failed in this case.
-Here, a=(0,0), b=(0,1) and c=(1,1)
+We could have choosen ~a~ instead of ~b~ at step ~7~.
+7. Choose ~a~
+8. Compare ~b~ and ~c~. ~b == c~
+9. If we choose ~b~ then it's ~abc~
+10. If we chose ~c~ then it will be ~acb~
 
 #+begin_src plantuml :file ../src/images/posts/blog-non-associative-sorting/merge-sort-explained.png
 @startuml
@@ -181,3 +94,244 @@ Here, a=(0,0), b=(0,1) and c=(1,1)
 
 #+RESULTS:
 [[file:../src/images/posts/blog-non-associative-sorting/merge-sort-explained.png]]
+
+There are many ifs to get the correct answer.
+Let's analyze the first situation why it failed to get the correct order.
+Seems like the breaking the problem was as usual.
+
+We missed something while merging the array back.
+
+The first merging step was ~c~ and ~a~.
+We compared ~c~ and ~a~ and got ~c > a~ leading to an order of ~ac~.
+Seems correct.
+
+Second merging step happened while merging ~b~ and ~ac~.
+We compared ~b~ and ~a~ and got ~b == a~.
+But this is not quite right.
+Because if we have compared ~a~ with ~b~ then the result would have been ~a < b~.
+
+The comparison metric is defined in such a way that it makes the comparison non-commutative and non-associative.
+
+** Improved Merge Sort
+
+The first solution that comes to mind if to modify the merge sort algorithm to compare the elements both way.
+Meaning, first compare ~a~ and ~b~ and then compare ~b~ and ~a~.
+But how will you order your preference of comparison.
+Let's say we give the equal the lowest priority.
+~comp(a, b)~ will give us ~a < b~.
+
+Let's create the comparison table as before.
+
+| ele1     | ele2     | compare (ele1, ele2) | Comments      |
+|----------+----------+----------------------+---------------|
+| a (0, 0) | a (0, 0) | a == a               |               |
+| a (0, 0) | b (0, 1) | a < b                | 1 > max(ele1) |
+| a (0, 0) | c (1, 1) | a < c                | 1 > max(ele1) |
+| b (0, 1) | a (0, 0) | b > a                |               |
+| b (0, 1) | b (0, 1) | b == b               |               |
+| b (0, 1) | c (1, 1) | b < c                |               |
+| c (1, 1) | a (0, 0) | c > a                | 0 < min(ele1) |
+| c (1, 1) | b (0, 1) | c > b                | 0 < min(ele1) |
+| c (1, 1) | c (1, 1) | c == c               |               |
+
+Let's analyze the solution with this improvement.
+First comparison will give ~c > a~. Good.
+Second comparison is ~b~ and ~ac~.
+Comparing ~b~ and ~a~ will give us ~a~ first.
+Comparing ~b~ and ~c~ will give us ~b~ second and ~c~ as last. Good.
+This worked as we expected.
+
+But is it the correct algorithm? maybe.
+
+The major con in using this is you are changing the comparator function by giving more preference to inequalities than th equals.
+This leads to loss of information.
+Even if this gives a corect answer, you will need to justify its side effects.
+This can be a timebomb.
+
+* Any alternatives -- Modifed bubble sort
+** Bubble sort
+Bubble sort compares the alternate elements till the array is sorted.
+But the catch with the bubble sort algo is we skip the ith element after the swap.
+
+#+begin_src plantuml :file ../src/images/posts/blog-non-associative-sorting/modified-bubble-sort.png
+@startuml
+
+start
+:Initialize array [a, b, c];
+while (Not sorted?) is (yes)
+    :Set sorted flag to true;
+    :Iterate over array elements;
+    if (Element i > Element i+1?) then (yes)
+        :Swap elements i and i+1;
+        :Set sorted flag to false;
+    endif
+endwhile (no)
+:Sorted array: [a, b, c];
+stop
+
+@enduml
+
+#+end_src
+
+#+RESULTS:
+[[file:../src/images/posts/blog-non-associative-sorting/modified-bubble-sort.png]]
+
+#+begin_src java :results output
+import java.util.*;
+
+public class NonAssociativeSort
+{
+  private static int compare(List<Integer> a, List<Integer> b) {
+     for (int e : b) {
+       if (e > a.get(a.size()-1)){
+         System.out.println(b + " > " + a);
+         return -1;
+       }
+       else if (e < a.get(0)){
+         System.out.println(b + " < " + a);
+         return 1;
+       }
+     }
+     return 0;
+  }
+  public static void main(String [] args) {
+    // List of elements
+    List<List<Integer>> arr = new ArrayList<>();
+    arr.add(List.of(-3,-1,1));
+    arr.add(List.of(0,0,2));
+    arr.add(List.of(2,2,2));
+    arr.add(List.of(0,0,0));
+
+    // Logic for comparison
+    for (int i=0; i<arr.size(); i++) {
+        for (int j=i+1; j<arr.size(); j++) {
+            if (compare(arr.get(i), arr.get(j)) > 0) {
+                List<Integer> temp = arr.get(i);
+                arr.set(i, arr.get(j));
+                arr.set(j, temp);
+                j=i+1;
+            }
+        }
+    }
+
+    System.out.println("final:" + arr);
+  }
+}
+
+#+end_src
+
+#+RESULTS:
+: [0, 0, 2] > [-3, -1, 1]
+: [2, 2, 2] > [-3, -1, 1]
+: [0, 0, 0] < [2, 2, 2]
+: final:[[-3, -1, 1], [0, 0, 2], [0, 0, 0], [2, 2, 2]]
+
+* Code
+#+NAME: MERGE_SORT_IMPLEMENTATION
+#+begin_src java :results output
+public static <T> void mergeSort(List<T> arr, Comparator<? super T> cmp) {
+    System.out.println("In: "+arr);
+    if (arr.size() < 2) {
+        return;
+    }
+    int mid = arr.size() / 2;
+    List<T> left = new ArrayList(arr.subList(0, mid));
+    List<T> right = new ArrayList(arr.subList(mid, arr.size()));
+    mergeSort(left, cmp);
+    mergeSort(right, cmp);
+    merge(arr, left, right, cmp);
+    System.out.println("Out: "+arr);
+}
+
+private static <T> void merge(List<T> result, List<T> left, List<T> right, Comparator<? super T> cmp) {
+    int i = 0, j = 0, k = 0;
+    while (i < left.size() && j < right.size()) {
+        if (cmp.compare(left.get(i), right.get(j)) > 0 || cmp.compare(right.get(j), left.get(i)) < 0) {
+            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+right.get(j));
+            result.set(k++, right.get(j++));
+        } else if (cmp.compare(left.get(i), right.get(j)) < 0 || cmp.compare(right.get(j), left.get(i)) > 0){
+            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+left.get(i));
+            result.set(k++, left.get(i++));
+        } else {
+            System.out.println("Compare: "+left.get(i)+","+right.get(j)+" :Choose "+left.get(i));
+            result.set(k++, left.get(i++));
+        }
+    }
+    while (i < left.size()) {
+        System.out.println("Rest of the left: "+left.get(i));
+        result.set(k++, left.get(i++));
+    }
+    while (j < right.size()) {
+        System.out.println("Rest of the right: "+right.get(j));
+        result.set(k++, right.get(j++));
+    }
+}
+#+end_src
+
+#+begin_src java :results output :noweb yes
+import java.util.*;
+
+public class NonAssociativeSort
+{
+<<MERGE_SORT_IMPLEMENTATION>>
+
+  public static void main(String [] args) {
+    // List of elements
+    List<List<Integer>> arr = new ArrayList<>();
+    arr.add(List.of(-3,-1,1));
+    arr.add(List.of(0,0,2));
+    arr.add(List.of(2,2,2));
+    arr.add(List.of(0,0,0));
+
+    // Logic fpr comparison
+    mergeSort(arr, (a, b) -> {
+      for (int e : b) {
+        if (e > a.get(a.size()-1)){
+          System.out.println(b + " > " + a);
+          return -1;
+        }
+        else if (e < a.get(0)){
+          System.out.println(b + " < " + a);
+          return 1;
+        }
+      }
+      return 0;
+    });
+
+    System.out.println("final:" + arr);
+  }
+}
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+In: [[-3, -1, 1], [0, 0, 2], [2, 2, 2], [0, 0, 0]]
+In: [[-3, -1, 1], [0, 0, 2]]
+In: [[-3, -1, 1]]
+In: [[0, 0, 2]]
+[0, 0, 2] > [-3, -1, 1]
+[-3, -1, 1] < [0, 0, 2]
+[0, 0, 2] > [-3, -1, 1]
+Compare: [-3, -1, 1],[0, 0, 2] :Choose [-3, -1, 1]
+Rest of the right: [0, 0, 2]
+Out: [[-3, -1, 1], [0, 0, 2]]
+In: [[2, 2, 2], [0, 0, 0]]
+In: [[2, 2, 2]]
+In: [[0, 0, 0]]
+[0, 0, 0] < [2, 2, 2]
+Compare: [2, 2, 2],[0, 0, 0] :Choose [0, 0, 0]
+Rest of the left: [2, 2, 2]
+Out: [[0, 0, 0], [2, 2, 2]]
+[-3, -1, 1] < [0, 0, 0]
+[-3, -1, 1] < [0, 0, 0]
+Compare: [-3, -1, 1],[0, 0, 0] :Choose [-3, -1, 1]
+[0, 0, 2] > [0, 0, 0]
+Compare: [0, 0, 2],[0, 0, 0] :Choose [0, 0, 0]
+[0, 0, 2] < [2, 2, 2]
+[0, 0, 2] < [2, 2, 2]
+Compare: [0, 0, 2],[2, 2, 2] :Choose [0, 0, 2]
+Rest of the right: [2, 2, 2]
+Out: [[-3, -1, 1], [0, 0, 0], [0, 0, 2], [2, 2, 2]]
+final:[[-3, -1, 1], [0, 0, 0], [0, 0, 2], [2, 2, 2]]
+#+end_example
