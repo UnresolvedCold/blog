@@ -24,3 +24,5 @@ echo "* Introduction" >> $new_file
 # Result
 echo "Starter file generated!"
 echo "Happy Blogging"
+
+
