@@ -126,7 +126,7 @@ jobs:
           rm -rf dist
           npm run build --if-present
       - name: Archive Dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
